@@ -1,8 +1,5 @@
 # Projet de Programmation Répartie
 
-## BUT Informatique
-
-Ce projet s'inscrit . Il s'agit d'un projet de programmation répartie.
 
 ## Équipe
 
@@ -15,7 +12,12 @@ Ce projet est réalisé par :
 
 ## Description du projet
 
+Cette SAÉ concerne les enseignements suivants
 
+    - R4.01      Architecture logicielle
+    - R4.02      Qualité de dev. / tests
+    - R4.03      Qualité et au-delà du relationnel
+    - R4.A.10   Complément web
 
 ## Technologies utilisées
 
