@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ServiceRestaurant implements ServiceRMI{
+
     private Connection connexion;
 
     public ServiceRestaurant(String identifiant, String mdp) throws RemoteException {
@@ -70,6 +71,7 @@ public class ServiceRestaurant implements ServiceRMI{
                 }
             }
         }
+>>>>>>> 8e99cdaaaabf0361c2a1b61f83426a74ceff43ec
     }
 
 
