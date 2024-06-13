@@ -3,13 +3,13 @@ package Serveur;
 import Service.ServiceRMI;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import oracle.jdbc.driver.json.Jsonp;
+
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class RestaurantHandler implements HttpHandler {
-    private ServiceRMI serviceRMI;
+    private final ServiceRMI serviceRMI;
 
     public RestaurantHandler(ServiceRMI service){
         super();

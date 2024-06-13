@@ -10,7 +10,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import javax.json.*;
 public class PostHandler implements HttpHandler {
-    private ServiceRMI serviceRMI;
+    private final ServiceRMI serviceRMI;
     public PostHandler(ServiceRMI service){
         super();
         this.serviceRMI = service;
@@ -27,19 +27,27 @@ public class PostHandler implements HttpHandler {
             try {
                 String nom = jsonObject.getString("nom");
                 String prenom = jsonObject.getString("prenom");
-                String nbPersonneString = jsonObject.getString("nbPersonne");
+                int nbPersonne = jsonObject.getInt("nbPersonne");
                 String tel = jsonObject.getString("tel");
-                if((nom.isEmpty()) || (prenom.isEmpty()) || (nbPersonneString.isEmpty()) || (tel.isEmpty())) {
+                int idRestaurant = jsonObject.getInt("idRestaurant");
+                if((nom.isEmpty()) || (prenom.isEmpty()) || (tel.isEmpty())) {
                     exchange.sendResponseHeaders(400, 0);
-                    String response = "Les attributs nom prenom nbPersonne et tel sont obligatoires.";
+                    String response = "Les attributs nom prenom nbPersonne idRestaurant et tel sont obligatoires.";
                     OutputStream os = exchange.getResponseBody();
                     os.write(response.getBytes());
                     os.close();
                     return;
                 }
-                int nbPersonne = Integer.parseInt(nbPersonneString);
-                exchange.sendResponseHeaders(200, 0);
-                String response = "Votre réservation a été effectué avec succès";
+                String response = serviceRMI.reserverTable(nom,prenom,nbPersonne,tel,idRestaurant);
+                if (response.isEmpty()){
+                    exchange.sendResponseHeaders(400, 0);
+                    String responseString = "Votre réservation n'a pas pu être effectué";
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(responseString.getBytes());
+                    os.close();
+                    return;
+                }
+                exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
