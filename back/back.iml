@@ -7,36 +7,5 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-<<<<<<< HEAD
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/ojdbc11.jar!/" />
-=======
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../EtudeCasSQL/ojdbc11.jar!/" />
->>>>>>> 8e99cdaaaabf0361c2a1b61f83426a74ceff43ec
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-<<<<<<< HEAD
-    <orderEntry type="library" name="javax.json.api" level="project" />
-    <orderEntry type="module-library" exported="">
-=======
-    <orderEntry type="library" name="javax.json.api" level="application" />
-    <orderEntry type="module-library">
->>>>>>> 8e99cdaaaabf0361c2a1b61f83426a74ceff43ec
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/javax.json-1.1.4.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
   </component>
 </module>
