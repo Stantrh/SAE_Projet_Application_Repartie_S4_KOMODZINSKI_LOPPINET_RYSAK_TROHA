@@ -74,7 +74,7 @@ public class ServiceRestaurant implements ServiceRMI{
 
 
     @Override
-    public String reserverTable(String nom, String prenom, int nbPersonne, int tel, int idRestaurant) throws RemoteException {
+    public String reserverTable(String nom, String prenom, int nbPersonne, String tel, int idRestaurant) throws RemoteException {
         try {
             // Désactiver l'auto-commit pour gérer les transactions manuellement
             connexion.setAutoCommit(false);
@@ -87,7 +87,7 @@ public class ServiceRestaurant implements ServiceRMI{
             preparedStatement.setString(1, nom);
             preparedStatement.setString(2, prenom);
             preparedStatement.setInt(3, nbPersonne);
-            preparedStatement.setInt(4, tel);
+            preparedStatement.setString(4, tel);
             preparedStatement.setInt(5, idRestaurant);
 
             // Exécution de la requête
