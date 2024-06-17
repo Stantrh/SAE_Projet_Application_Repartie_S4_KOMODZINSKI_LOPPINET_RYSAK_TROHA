@@ -7,6 +7,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import Service.ServiceBDD;
+import ServiceDonneesBloquees.DataService;
 public class LancerHttpServer {
     public static void main(String[] args) {
         int port =0;
@@ -17,14 +18,15 @@ public class LancerHttpServer {
             Registry reg = LocateRegistry.getRegistry(args[0],port);
             try {
                 ServiceBDD serviceBDD = (ServiceBDD)reg.lookup("DistributeurRMI");
+                DataService serviceData = (DataService)reg.lookup("distributeurDonneesBloquees");
                 try{
-                    ServiceHttpRestaurant service = new ServiceHttpRestaurant(serviceBDD);
+                    ServiceHttpRestaurant service = new ServiceHttpRestaurant(serviceBDD,serviceData);
                     service.lancerServer();
                 }catch (IOException e){
                     System.out.println("Erreur lors du lancement du Serveur");
                 }
             }catch (NotBoundException e){
-                System.out.println("Impossible de trouver le service DistributeurRMI dans l'annuaire");
+                System.out.println("Impossible de trouver le service DistributeurRMI ou distributeurDonneesBloquees dans l'annuaire");
             }
         }catch (RemoteException e){
             System.out.println("Problème de connexion à l'annuaire");

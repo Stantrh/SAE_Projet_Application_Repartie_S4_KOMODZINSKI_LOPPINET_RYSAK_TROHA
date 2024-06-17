@@ -4,29 +4,32 @@ package Serveur;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import Service.ServiceBDD;
+import ServiceDonneesBloquees.DataService;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class RestaurantHandler implements HttpHandler {
-    private final ServiceBDD serviceBDD;
+public class GetDataHandler implements HttpHandler {
+    private final DataService serviceData;
+    private String url;
 
-    public RestaurantHandler(ServiceBDD service){
+    public GetDataHandler(DataService serviceData, String url){
         super();
-        this.serviceBDD = service;
+        this.serviceData = serviceData;
+        this.url = url;
     }
     @Override
     public void handle(HttpExchange exchange) throws IOException {
             if("GET".equals(exchange.getRequestMethod())){
             try{
-                String restaurants = this.serviceBDD.getAllRestaurant();
-                exchange.sendResponseHeaders(200, restaurants.length());
+                String response = this.serviceData.fetchData(url);
+                exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
-                os.write(restaurants.getBytes());
+                os.write(response.getBytes());
                 os.close();
             }catch (Exception e){
                 exchange.sendResponseHeaders(500, 0);
-                String response = "Erreur, lors de l'accès à la base de donnée : "+e.getMessage();
+                String response = "Erreur, lors de l'accès aux de données : "+e.getMessage();
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
