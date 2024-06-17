@@ -119,7 +119,7 @@ public class ServiceRestaurant extends UnicastRemoteObject implements ServiceRMI
 
             // Préparation de la requête d'insertion
             String requete = "INSERT INTO restaurants (Nom, adresse, latitude, longitude) VALUES (?, ?, ?, ?)";
-            PreparedStatement preparedStatement = connexion.prepareStatement(requete);
+            PreparedStatement preparedStatement = connexion.prepareStatement(requete, new String[] { "restaurantId" });
 
             // Remplissage des paramètres de la requête
             preparedStatement.setString(1, nom);

@@ -11,10 +11,10 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-public class PostHandler implements HttpHandler {
+public class PostAddRestaurant implements HttpHandler {
     private final ServiceRMI serviceRMI;
 
-    public PostHandler(ServiceRMI service) {
+    public PostAddRestaurant(ServiceRMI service) {
         super();
         this.serviceRMI = service;
     }
@@ -23,9 +23,7 @@ public class PostHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         if ("POST".equals(exchange.getRequestMethod())) {
             InputStream requestBody = exchange.getRequestBody();
-            System.out.println(requestBody);
             String body = new String(requestBody.readAllBytes());
-            System.out.println(body);
             if(body.isEmpty()){
                 exchange.sendResponseHeaders(400, 0);
                 String response = "Body required";
@@ -39,45 +37,42 @@ public class PostHandler implements HttpHandler {
 
             try {
                 String nom = jsonObject.getString("nom");
-                String prenom = jsonObject.getString("prenom");
-                int nbPersonne = jsonObject.getInt("nbPersonne");
-                String tel = jsonObject.getString("tel");
-                int idRestaurant = jsonObject.getInt("idRestaurant");
+                String adresse = jsonObject.getString("adresse");
+                Double latitude = jsonObject.getJsonNumber("latitude").doubleValue();
+                Double longitude = jsonObject.getJsonNumber("longitude").doubleValue();
 
-                if (nom.isEmpty() || prenom.isEmpty() || tel.isEmpty()) {
+                if (nom.isEmpty() || adresse.isEmpty()) {
                     exchange.sendResponseHeaders(400, 0);
-                    String response = "Les attributs nom, prenom, nbPersonne, idRestaurant et tel sont obligatoires.";
+                    String response = "Les attributs nom, adresse lagitude et longitude sont obligatoires.";
                     try (OutputStream os = exchange.getResponseBody()) {
                         os.write(response.getBytes());
                     }
                     return;
                 }
-
-                String response = serviceRMI.reserverTable(nom, prenom, nbPersonne, tel, idRestaurant);
+                String response = serviceRMI.ajouterRestaurant(nom, adresse, latitude, longitude);
+                System.out.println(response);
                 if (response.isEmpty()) {
                     exchange.sendResponseHeaders(400, 0);
-                    String responseString = "Votre reservation n'a pas pu être effectuee";
+                    String responseString = "Votre ajout de restaurant n'a pas pu être effectuee";
                     try (OutputStream os = exchange.getResponseBody()) {
                         os.write(responseString.getBytes());
                     }
                     return;
                 }
 
-                String responseOk="Reservation reussie";
-
-                exchange.sendResponseHeaders(200, responseOk.length());
+                exchange.sendResponseHeaders(200, response.length());
                 try (OutputStream os = exchange.getResponseBody()) {                    
-                    os.write(responseOk.getBytes());
+                    os.write(response.getBytes());
                 }
             } catch (NullPointerException e) {
                 exchange.sendResponseHeaders(400, 0);
-                String response = "Les attributs nom, prenom, nbPersonne, idRestaurant et tel sont obligatoires.";
+                String response = "Les attributs nom, adresse lagitude et longitude sont obligatoires.";
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(response.getBytes());
                 }
             } catch (NumberFormatException e) {
                 exchange.sendResponseHeaders(400, 0);
-                String response = "nbPersonne n'est pas un nombre.";
+                String response = "les coordonées ne sont pas des Double";
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(response.getBytes());
                 }

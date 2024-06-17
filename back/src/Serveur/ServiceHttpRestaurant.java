@@ -16,7 +16,7 @@ public class ServiceHttpRestaurant {
         server = HttpServer.create(new InetSocketAddress(8080),0);
         server.createContext("/restaurants", new RestaurantHandler(serviceRMI));
         server.createContext("/reserverTable", new PostHandler(serviceRMI));
-
+        server.createContext("/ajouterRestaurant", new PostAddRestaurant(serviceRMI));
     }
     public void lancerServer(){
         server.setExecutor(null);
