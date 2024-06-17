@@ -62,7 +62,7 @@ public class ServiceRestaurant extends UnicastRemoteObject implements ServiceRMI
         } catch (SQLException e) {
             System.out.println("Problème avec une requête SQL");
             throw new RemoteException("Erreur SQL", e);
-        } 
+        }
 
     }
 
@@ -93,7 +93,7 @@ public class ServiceRestaurant extends UnicastRemoteObject implements ServiceRMI
             } else {
                 // Annuler la transaction si l'insertion a échoué
                 connexion.rollback();
-                return "Échec de la réservation";
+                return "";
             }
 
         } catch (SQLException e) {
@@ -107,6 +107,6 @@ public class ServiceRestaurant extends UnicastRemoteObject implements ServiceRMI
             }
             System.out.println("Problème avec une requête SQL");
             throw new RemoteException("Erreur SQL", e);
-        } 
+        }
     }
 }
