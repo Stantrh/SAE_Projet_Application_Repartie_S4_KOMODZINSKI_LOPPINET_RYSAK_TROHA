@@ -57,6 +57,18 @@
     }
   });
 
+  // lib/dataloader.js
+  function fetchApi(api, options) {
+    return __async(this, null, function* () {
+      console.log("fetch api");
+      return yield fetch(api, options);
+    });
+  }
+  var init_dataloader = __esm({
+    "lib/dataloader.js"() {
+    }
+  });
+
   // node_modules/leaflet/dist/leaflet-src.js
   var require_leaflet_src = __commonJS({
     "node_modules/leaflet/dist/leaflet-src.js"(exports, module) {
@@ -11619,43 +11631,95 @@
     }
   });
 
-  // lib/dataloader.js
-  function fetchApi(api) {
+  // lib/map_ui.js
+  function fetchData(url) {
     return __async(this, null, function* () {
-      console.log("fetch api");
-      return yield fetch(api);
+      const response = yield fetchApi(url);
+      const data = yield response.json();
+      return data.data.stations;
     });
   }
-  var init_dataloader = __esm({
-    "lib/dataloader.js"() {
-    }
-  });
-
-  // lib/map_ui.js
+  function createMarker(station, status, map) {
+    const marker = import_leaflet.default.marker([station.lat, station.lon]).addTo(map);
+    marker.bindPopup(`
+        <b>${station.name}</b><br>
+        Adresse: ${station.address}<br>
+        V\xE9los disponibles: ${status.num_bikes_available}<br>
+        Places libres: ${status.num_docks_available}
+    `);
+  }
+  function createRestaurantMarker(restaurant, map) {
+    const marker = import_leaflet.default.marker([restaurant.Latitude, restaurant.Longitude], {
+      icon: import_leaflet.default.icon({
+        iconUrl: "../resources/icon-restaurant.png",
+        iconSize: [41, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      })
+    }).addTo(map);
+    const popupContent = `
+        <b>${restaurant.Nom}</b><br>
+        Adresse: ${restaurant.Adresse}<br><br>
+        <form id="reservation-form-${restaurant.RestaurantID}">
+            <label for="nom">Nom:</label><br>
+            <input type="text" id="nom" name="nom"><br>
+            <label for="prenom">Pr\xE9nom:</label><br>
+            <input type="text" id="prenom" name="prenom"><br>
+            <label for="nbPersonne">Nombre de personnes:</label><br>
+            <input type="number" id="nbPersonne" name="nbPersonne"><br>
+            <label for="tel">T\xE9l\xE9phone:</label><br>
+            <input type="text" id="tel" name="tel"><br><br>
+            <input type="hidden" id="idRestaurant" name="idRestaurant" value="${restaurant.RestaurantID}">
+            <input type="submit" value="R\xE9server">
+        </form>
+    `;
+    marker.bindPopup(popupContent);
+    marker.on("popupopen", function() {
+      const form = document.getElementById(`reservation-form-${restaurant.RestaurantID}`);
+      form.addEventListener("submit", function(event) {
+        return __async(this, null, function* () {
+          event.preventDefault();
+          const formData = new FormData(form);
+          const data = {
+            nom: formData.get("nom"),
+            prenom: formData.get("prenom"),
+            nbPersonne: parseInt(formData.get("nbPersonne")),
+            tel: formData.get("tel"),
+            idRestaurant: parseInt(formData.get("idRestaurant"))
+          };
+          try {
+            const response = yield fetchApi("/reserverTable", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(data)
+            });
+            const result = yield response.json();
+            alert("R\xE9servation r\xE9ussie!");
+          } catch (error) {
+            console.error("Erreur:", error);
+            alert("Erreur lors de la r\xE9servation. Veuillez r\xE9essayer.");
+          }
+        });
+      });
+    });
+  }
   function initMap() {
     return __async(this, null, function* () {
       try {
-        const stationInfoResponse = yield fetchApi(stationInfoUrl);
-        const stationStatusResponse = yield fetchApi(stationStatusUrl);
-        const stationInfoData = yield stationInfoResponse.json();
-        const stationStatusData = yield stationStatusResponse.json();
-        const stationInfo = stationInfoData.data.stations;
-        const stationStatus = stationStatusData.data.stations;
+        const stationInfo = yield fetchData(stationInfoUrl);
+        const stationStatus = yield fetchData(stationStatusUrl);
         const map = import_leaflet.default.map("map").setView([48.683331, 6.2], 13);
         import_leaflet.default.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 20,
-          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          attribution: '\xA9 <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
         stationInfo.forEach((station) => {
           const status = stationStatus.find((s) => s.station_id === station.station_id);
           if (status) {
-            const marker = import_leaflet.default.marker([station.lat, station.lon]).addTo(map);
-            marker.bindPopup(`
-                    <b>${station.name}</b><br>
-                    Adresse: ${station.address}<br>
-                    V\xE9los disponibles: ${status.num_bikes_available}<br>
-                    Places libres: ${status.num_docks_available}
-                `);
+            createMarker(station, status, map);
           }
         });
         const restaurantsReceived = [
@@ -11663,63 +11727,12 @@
           { "RestaurantID": 2, "Nom": "foodies burger", "Adresse": "4 Rue des Tiercelins, 54000 Nancy", "Latitude": 48.6896, "Longitude": 6.1852 },
           { "RestaurantID": 3, "Nom": "Khan Restaurant", "Adresse": "58 Rue des Ponts, 54000 Nancy", "Latitude": 48.6871, "Longitude": 6.1827 },
           { "RestaurantID": 4, "Nom": "Koboon", "Adresse": "34 Av. du XX Corps, 54000 Nancy", "Latitude": 48.6938, "Longitude": 6.1911 },
-          { "RestaurantID": 5, "Nom": "Zeugma", "Adresse": "32-34 Rue des S\uFFFDurs Macarons, 54000 Nancy", "Latitude": 48.6891, "Longitude": 6.1848 },
-          { "RestaurantID": 6, "Nom": "C\uFFFDt\uFFFD Sushi", "Adresse": "18 Pl. Henri Mengin, 54000 Nancy", "Latitude": 48.6903, "Longitude": 6.1819 },
-          { "RestaurantID": 7, "Nom": "Chicken Street", "Adresse": "16 Av. du G\uFFFDn\uFFFDral Leclerc, 54000 Nancy", "Latitude": 48.6851, "Longitude": 6.186 }
+          { "RestaurantID": 5, "Nom": "Zeugma", "Adresse": "32-34 Rue des S\u0153urs Macarons, 54000 Nancy", "Latitude": 48.6891, "Longitude": 6.1848 },
+          { "RestaurantID": 6, "Nom": "C\xF4t\xE9 Sushi", "Adresse": "18 Pl. Henri Mengin, 54000 Nancy", "Latitude": 48.6903, "Longitude": 6.1819 },
+          { "RestaurantID": 7, "Nom": "Chicken Street", "Adresse": "16 Av. du G\xE9n\xE9ral Leclerc, 54000 Nancy", "Latitude": 48.6851, "Longitude": 6.186 }
         ];
         restaurantsReceived.forEach((restaurant) => {
-          const marker = import_leaflet.default.marker([restaurant.Latitude, restaurant.Longitude], {
-            icon: import_leaflet.default.icon({
-              iconUrl: "../resources/icon-restaurant.png",
-              iconSize: [41, 41],
-              iconAnchor: [12, 41],
-              popupAnchor: [1, -34],
-              shadowSize: [41, 41]
-            })
-          }).addTo(map);
-          const popupContent = `
-                <b>${restaurant.Nom}</b><br>
-                Adresse: ${restaurant.Adresse}<br><br>
-                <form id="reservation-form-${restaurant.RestaurantID}">
-                    <label for="nom">Nom:</label><br>
-                    <input type="text" id="nom" name="nom"><br>
-                    <label for="prenom">Pr\xE9nom:</label><br>
-                    <input type="text" id="prenom" name="prenom"><br>
-                    <label for="nbPersonne">Nombre de personnes:</label><br>
-                    <input type="number" id="nbPersonne" name="nbPersonne"><br>
-                    <label for="tel">T\xE9l\xE9phone:</label><br>
-                    <input type="text" id="tel" name="tel"><br><br>
-                    <input type="hidden" id="idRestaurant" name="idRestaurant" value="${restaurant.RestaurantID}">
-                    <input type="submit" value="R\xE9server">
-                </form>
-            `;
-          marker.bindPopup(popupContent);
-          marker.on("popupopen", function() {
-            const form = document.getElementById(`reservation-form-${restaurant.RestaurantID}`);
-            form.addEventListener("submit", function(event) {
-              event.preventDefault();
-              const formData = new FormData(form);
-              const data = {
-                nom: formData.get("nom"),
-                prenom: formData.get("prenom"),
-                nbPersonne: parseInt(formData.get("nbPersonne")),
-                tel: formData.get("tel"),
-                idRestaurant: parseInt(formData.get("idRestaurant"))
-              };
-              fetch("/reserverTable", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-              }).then((response) => response.json()).then((result) => {
-                alert("R\xE9servation r\xE9ussie!");
-              }).catch((error) => {
-                console.error("Erreur:", error);
-                alert("Erreur lors de la r\xE9servation. Veuillez r\xE9essayer.");
-              });
-            });
-          });
+          createRestaurantMarker(restaurant, map);
         });
       } catch (error) {
         console.error("Erreur lors de la r\xE9cup\xE9ration des donn\xE9es :", error);
@@ -11730,10 +11743,10 @@
   var init_map_ui = __esm({
     "lib/map_ui.js"() {
       init_config();
+      init_dataloader();
       import_leaflet = __toESM(require_leaflet_src());
       import_leaflet2 = __toESM(require_leaflet_markercluster_src());
       init_leaflet_heat();
-      init_dataloader();
     }
   });
 
