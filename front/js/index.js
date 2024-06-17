@@ -11,6 +11,10 @@
   var __commonJS = (cb, mod) => function __require() {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
   };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
   var __copyProps = (to, from, except, desc) => {
     if (from && typeof from === "object" || typeof from === "function") {
       for (let key of __getOwnPropNames(from))
@@ -161,7 +165,7 @@
           }
           return obj.options;
         }
-        function getParamString(obj, existingUrl, uppercase) {
+        function getParamString2(obj, existingUrl, uppercase) {
           var params = [];
           for (var i in obj) {
             params.push(encodeURIComponent(uppercase ? i.toUpperCase() : i) + "=" + encodeURIComponent(obj[i]));
@@ -169,7 +173,7 @@
           return (!existingUrl || existingUrl.indexOf("?") === -1 ? "?" : "&") + params.join("&");
         }
         var templateRe = /\{ *([\w_ -]+) *\}/g;
-        function template(str, data) {
+        function template2(str, data) {
           return str.replace(templateRe, function(str2, key) {
             var value = data[key];
             if (value === void 0) {
@@ -233,8 +237,8 @@
           trim,
           splitWords,
           setOptions,
-          getParamString,
-          template,
+          getParamString: getParamString2,
+          template: template2,
           isArray,
           indexOf,
           emptyImageUrl,
@@ -861,7 +865,7 @@
           // Extend the bounds to contain the given bounds
           extend: function(obj) {
             var sw = this._southWest, ne = this._northEast, sw2, ne2;
-            if (obj instanceof LatLng) {
+            if (obj instanceof LatLng2) {
               sw2 = obj;
               ne2 = obj;
             } else if (obj instanceof LatLngBounds) {
@@ -874,8 +878,8 @@
               return obj ? this.extend(toLatLng(obj) || toLatLngBounds(obj)) : this;
             }
             if (!sw && !ne) {
-              this._southWest = new LatLng(sw2.lat, sw2.lng);
-              this._northEast = new LatLng(ne2.lat, ne2.lng);
+              this._southWest = new LatLng2(sw2.lat, sw2.lng);
+              this._northEast = new LatLng2(ne2.lat, ne2.lng);
             } else {
               sw.lat = Math.min(sw2.lat, sw.lat);
               sw.lng = Math.min(sw2.lng, sw.lng);
@@ -891,14 +895,14 @@
           pad: function(bufferRatio) {
             var sw = this._southWest, ne = this._northEast, heightBuffer = Math.abs(sw.lat - ne.lat) * bufferRatio, widthBuffer = Math.abs(sw.lng - ne.lng) * bufferRatio;
             return new LatLngBounds(
-              new LatLng(sw.lat - heightBuffer, sw.lng - widthBuffer),
-              new LatLng(ne.lat + heightBuffer, ne.lng + widthBuffer)
+              new LatLng2(sw.lat - heightBuffer, sw.lng - widthBuffer),
+              new LatLng2(ne.lat + heightBuffer, ne.lng + widthBuffer)
             );
           },
           // @method getCenter(): LatLng
           // Returns the center point of the bounds.
           getCenter: function() {
-            return new LatLng(
+            return new LatLng2(
               (this._southWest.lat + this._northEast.lat) / 2,
               (this._southWest.lng + this._northEast.lng) / 2
             );
@@ -916,12 +920,12 @@
           // @method getNorthWest(): LatLng
           // Returns the north-west point of the bounds.
           getNorthWest: function() {
-            return new LatLng(this.getNorth(), this.getWest());
+            return new LatLng2(this.getNorth(), this.getWest());
           },
           // @method getSouthEast(): LatLng
           // Returns the south-east point of the bounds.
           getSouthEast: function() {
-            return new LatLng(this.getSouth(), this.getEast());
+            return new LatLng2(this.getSouth(), this.getEast());
           },
           // @method getWest(): Number
           // Returns the west longitude of the bounds
@@ -949,7 +953,7 @@
           // @method contains (latlng: LatLng): Boolean
           // Returns `true` if the rectangle contains the given point.
           contains: function(obj) {
-            if (typeof obj[0] === "number" || obj instanceof LatLng || "lat" in obj) {
+            if (typeof obj[0] === "number" || obj instanceof LatLng2 || "lat" in obj) {
               obj = toLatLng(obj);
             } else {
               obj = toLatLngBounds(obj);
@@ -1003,7 +1007,7 @@
           }
           return new LatLngBounds(a, b);
         }
-        function LatLng(lat, lng, alt) {
+        function LatLng2(lat, lng, alt) {
           if (isNaN(lat) || isNaN(lng)) {
             throw new Error("Invalid LatLng object: (" + lat + ", " + lng + ")");
           }
@@ -1013,7 +1017,7 @@
             this.alt = +alt;
           }
         }
-        LatLng.prototype = {
+        LatLng2.prototype = {
           // @method equals(otherLatLng: LatLng, maxMargin?: Number): Boolean
           // Returns `true` if the given `LatLng` point is at the same position (within a small margin of error). The margin of error can be overridden by setting `maxMargin` to a small number.
           equals: function(obj, maxMargin) {
@@ -1052,19 +1056,19 @@
             );
           },
           clone: function() {
-            return new LatLng(this.lat, this.lng, this.alt);
+            return new LatLng2(this.lat, this.lng, this.alt);
           }
         };
         function toLatLng(a, b, c) {
-          if (a instanceof LatLng) {
+          if (a instanceof LatLng2) {
             return a;
           }
           if (isArray(a) && typeof a[0] !== "object") {
             if (a.length === 3) {
-              return new LatLng(a[0], a[1], a[2]);
+              return new LatLng2(a[0], a[1], a[2]);
             }
             if (a.length === 2) {
-              return new LatLng(a[0], a[1]);
+              return new LatLng2(a[0], a[1]);
             }
             return null;
           }
@@ -1072,12 +1076,12 @@
             return a;
           }
           if (typeof a === "object" && "lat" in a) {
-            return new LatLng(a.lat, "lng" in a ? a.lng : a.lon, a.alt);
+            return new LatLng2(a.lat, "lng" in a ? a.lng : a.lon, a.alt);
           }
           if (b === void 0) {
             return null;
           }
-          return new LatLng(a, b, c);
+          return new LatLng2(a, b, c);
         }
         var CRS = {
           // @method latLngToPoint(latlng: LatLng, zoom: Number): Point
@@ -1149,7 +1153,7 @@
           // CRS's `wrapLat` and `wrapLng` properties, if they are outside the CRS's bounds.
           wrapLatLng: function(latlng) {
             var lng = this.wrapLng ? wrapNum(latlng.lng, this.wrapLng, true) : latlng.lng, lat = this.wrapLat ? wrapNum(latlng.lat, this.wrapLat, true) : latlng.lat, alt = latlng.alt;
-            return new LatLng(lat, lng, alt);
+            return new LatLng2(lat, lng, alt);
           },
           // @method wrapLatLngBounds(bounds: LatLngBounds): LatLngBounds
           // Returns a `LatLngBounds` with the same size as the given one, ensuring
@@ -1160,7 +1164,7 @@
             if (latShift === 0 && lngShift === 0) {
               return bounds;
             }
-            var sw = bounds.getSouthWest(), ne = bounds.getNorthEast(), newSw = new LatLng(sw.lat - latShift, sw.lng - lngShift), newNe = new LatLng(ne.lat - latShift, ne.lng - lngShift);
+            var sw = bounds.getSouthWest(), ne = bounds.getNorthEast(), newSw = new LatLng2(sw.lat - latShift, sw.lng - lngShift), newNe = new LatLng2(ne.lat - latShift, ne.lng - lngShift);
             return new LatLngBounds(newSw, newNe);
           }
         };
@@ -1189,7 +1193,7 @@
           },
           unproject: function(point) {
             var d = 180 / Math.PI;
-            return new LatLng(
+            return new LatLng2(
               (2 * Math.atan(Math.exp(point.y / this.R)) - Math.PI / 2) * d,
               point.x * d / this.R
             );
@@ -2495,7 +2499,7 @@
             if (!this._container._leaflet_id) {
               return;
             }
-            var lat = pos.coords.latitude, lng = pos.coords.longitude, latlng = new LatLng(lat, lng), bounds = latlng.toBounds(pos.coords.accuracy * 2), options = this._locateOptions;
+            var lat = pos.coords.latitude, lng = pos.coords.longitude, latlng = new LatLng2(lat, lng), bounds = latlng.toBounds(pos.coords.accuracy * 2), options = this._locateOptions;
             if (options.setView) {
               var zoom2 = this.getBoundsZoom(bounds);
               this.setView(latlng, options.maxZoom ? Math.min(zoom2, options.maxZoom) : zoom2);
@@ -4383,7 +4387,7 @@
             return new Point(latlng.lng, latlng.lat);
           },
           unproject: function(point) {
-            return new LatLng(point.y, point.x);
+            return new LatLng2(point.y, point.x);
           },
           bounds: new Bounds([-180, -90], [180, 90])
         };
@@ -4405,7 +4409,7 @@
               dphi = Math.PI / 2 - 2 * Math.atan(ts * con) - phi;
               phi += dphi;
             }
-            return new LatLng(phi * d, point.x * d / r);
+            return new LatLng2(phi * d, point.x * d / r);
           }
         };
         var index = {
@@ -5647,7 +5651,7 @@
           },
           // recursively turns latlngs into a set of rings with projected coordinates
           _projectLatlngs: function(latlngs, result, projectedBounds) {
-            var flat = latlngs[0] instanceof LatLng, len = latlngs.length, i, ring;
+            var flat = latlngs[0] instanceof LatLng2, len = latlngs.length, i, ring;
             if (flat) {
               ring = [];
               for (i = 0; i < len; i++) {
@@ -5748,7 +5752,7 @@
           },
           _convertLatLngs: function(latlngs) {
             var result = Polyline.prototype._convertLatLngs.call(this, latlngs), len = result.length;
-            if (len >= 2 && result[0] instanceof LatLng && result[0].equals(result[len - 1])) {
+            if (len >= 2 && result[0] instanceof LatLng2 && result[0].equals(result[len - 1])) {
               result.pop();
             }
             return result;
@@ -5969,7 +5973,7 @@
           return pointToLayerFn ? pointToLayerFn(geojson, latlng) : new Marker(latlng, options && options.markersInheritOptions && options);
         }
         function coordsToLatLng(coords) {
-          return new LatLng(coords[1], coords[0], coords[2]);
+          return new LatLng2(coords[1], coords[0], coords[2]);
         }
         function coordsToLatLngs(coords, levelsDeep, _coordsToLatLng) {
           var latlngs = [];
@@ -6395,7 +6399,7 @@
             content: ""
           },
           initialize: function(options, source) {
-            if (options && (options instanceof LatLng || isArray(options))) {
+            if (options && (options instanceof LatLng2 || isArray(options))) {
               this._latlng = toLatLng(options);
               setOptions(this, source);
             } else {
@@ -8051,7 +8055,7 @@
               }
               data["-y"] = invertedY;
             }
-            return template(this._url, extend(data, this.options));
+            return template2(this._url, extend(data, this.options));
           },
           _tileOnLoad: function(done, tile) {
             if (Browser.ielt9) {
@@ -8178,7 +8182,7 @@
           },
           getTileUrl: function(coords) {
             var tileBounds = this._tileCoordsToNwSe(coords), crs = this._crs, bounds = toBounds(crs.project(tileBounds[0]), crs.project(tileBounds[1])), min = bounds.min, max = bounds.max, bbox = (this._wmsVersion >= 1.3 && this._crs === EPSG4326 ? [min.y, min.x, max.y, max.x] : [min.x, min.y, max.x, max.y]).join(","), url = TileLayer.prototype.getTileUrl.call(this, coords);
-            return url + getParamString(this.wmsParams, url, this.options.uppercase) + (this.options.uppercase ? "&BBOX=" : "&bbox=") + bbox;
+            return url + getParamString2(this.wmsParams, url, this.options.uppercase) + (this.options.uppercase ? "&BBOX=" : "&bbox=") + bbox;
           },
           // @method setParams(params: Object, noRedraw?: Boolean): this
           // Merges an object with the new parameters and re-requests tiles on the current screen (unless `noRedraw` was set to true).
@@ -9551,7 +9555,7 @@
         exports2.Handler = Handler;
         exports2.Icon = Icon;
         exports2.ImageOverlay = ImageOverlay;
-        exports2.LatLng = LatLng;
+        exports2.LatLng = LatLng2;
         exports2.LatLngBounds = LatLngBounds;
         exports2.Layer = Layer;
         exports2.LayerGroup = LayerGroup;
@@ -11631,6 +11635,1625 @@
     }
   });
 
+  // node_modules/leaflet-control-geocoder/src/util.js
+  function escapeChar(chr) {
+    return escape[chr];
+  }
+  function htmlEscape(string) {
+    if (string == null) {
+      return "";
+    } else if (!string) {
+      return string + "";
+    }
+    string = "" + string;
+    if (!possible.test(string)) {
+      return string;
+    }
+    return string.replace(badChars, escapeChar);
+  }
+  function jsonp(url, params, callback, context, jsonpParam) {
+    var callbackId = "_l_geocoder_" + lastCallbackId++;
+    params[jsonpParam || "callback"] = callbackId;
+    window[callbackId] = import_leaflet.default.Util.bind(callback, context);
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = url + getParamString(params);
+    script.id = callbackId;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  }
+  function getJSON(url, params, callback) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+      if (xmlHttp.readyState !== 4) {
+        return;
+      }
+      var message;
+      if (xmlHttp.status !== 200 && xmlHttp.status !== 304) {
+        message = "";
+      } else if (typeof xmlHttp.response === "string") {
+        try {
+          message = JSON.parse(xmlHttp.response);
+        } catch (e) {
+          message = xmlHttp.response;
+        }
+      } else {
+        message = xmlHttp.response;
+      }
+      callback(message);
+    };
+    xmlHttp.open("GET", url + getParamString(params), true);
+    xmlHttp.responseType = "json";
+    xmlHttp.setRequestHeader("Accept", "application/json");
+    xmlHttp.send(null);
+  }
+  function template(str, data) {
+    return str.replace(/\{ *([\w_]+) *\}/g, function(str2, key) {
+      var value = data[key];
+      if (value === void 0) {
+        value = "";
+      } else if (typeof value === "function") {
+        value = value(data);
+      }
+      return htmlEscape(value);
+    });
+  }
+  function getParamString(obj, existingUrl, uppercase) {
+    var params = [];
+    for (var i in obj) {
+      var key = encodeURIComponent(uppercase ? i.toUpperCase() : i);
+      var value = obj[i];
+      if (!import_leaflet.default.Util.isArray(value)) {
+        params.push(key + "=" + encodeURIComponent(value));
+      } else {
+        for (var j = 0; j < value.length; j++) {
+          params.push(key + "=" + encodeURIComponent(value[j]));
+        }
+      }
+    }
+    return (!existingUrl || existingUrl.indexOf("?") === -1 ? "?" : "&") + params.join("&");
+  }
+  var import_leaflet, lastCallbackId, badChars, possible, escape;
+  var init_util = __esm({
+    "node_modules/leaflet-control-geocoder/src/util.js"() {
+      import_leaflet = __toESM(require_leaflet_src());
+      lastCallbackId = 0;
+      badChars = /[&<>"'`]/g;
+      possible = /[&<>"'`]/;
+      escape = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#x27;",
+        "`": "&#x60;"
+      };
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/arcgis.js
+  function arcgis(accessToken, options) {
+    return new ArcGis(accessToken, options);
+  }
+  var import_leaflet2, ArcGis;
+  var init_arcgis = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/arcgis.js"() {
+      import_leaflet2 = __toESM(require_leaflet_src());
+      init_util();
+      ArcGis = import_leaflet2.default.Class.extend({
+        options: {
+          service_url: "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
+        },
+        initialize: function(accessToken, options) {
+          import_leaflet2.default.setOptions(this, options);
+          this._accessToken = accessToken;
+        },
+        geocode: function(query, cb, context) {
+          var params = {
+            SingleLine: query,
+            outFields: "Addr_Type",
+            forStorage: false,
+            maxLocations: 10,
+            f: "json"
+          };
+          if (this._key && this._key.length) {
+            params.token = this._key;
+          }
+          getJSON(
+            this.options.service_url + "/findAddressCandidates",
+            import_leaflet2.default.extend(params, this.options.geocodingQueryParams),
+            function(data) {
+              var results = [], loc, latLng2, latLngBounds;
+              if (data.candidates && data.candidates.length) {
+                for (var i = 0; i <= data.candidates.length - 1; i++) {
+                  loc = data.candidates[i];
+                  latLng2 = import_leaflet2.default.latLng(loc.location.y, loc.location.x);
+                  latLngBounds = import_leaflet2.default.latLngBounds(
+                    import_leaflet2.default.latLng(loc.extent.ymax, loc.extent.xmax),
+                    import_leaflet2.default.latLng(loc.extent.ymin, loc.extent.xmin)
+                  );
+                  results[i] = {
+                    name: loc.address,
+                    bbox: latLngBounds,
+                    center: latLng2
+                  };
+                }
+              }
+              cb.call(context, results);
+            }
+          );
+        },
+        suggest: function(query, cb, context) {
+          return this.geocode(query, cb, context);
+        },
+        reverse: function(location, scale, cb, context) {
+          var params = {
+            location: encodeURIComponent(location.lng) + "," + encodeURIComponent(location.lat),
+            distance: 100,
+            f: "json"
+          };
+          getJSON(this.options.service_url + "/reverseGeocode", params, function(data) {
+            var result = [], loc;
+            if (data && !data.error) {
+              loc = import_leaflet2.default.latLng(data.location.y, data.location.x);
+              result.push({
+                name: data.address.Match_addr,
+                center: loc,
+                bounds: import_leaflet2.default.latLngBounds(loc, loc)
+              });
+            }
+            cb.call(context, result);
+          });
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/bing.js
+  function bing(key) {
+    return new Bing(key);
+  }
+  var import_leaflet3, Bing;
+  var init_bing = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/bing.js"() {
+      import_leaflet3 = __toESM(require_leaflet_src());
+      init_util();
+      Bing = import_leaflet3.default.Class.extend({
+        initialize: function(key) {
+          this.key = key;
+        },
+        geocode: function(query, cb, context) {
+          jsonp(
+            "https://dev.virtualearth.net/REST/v1/Locations",
+            {
+              query,
+              key: this.key
+            },
+            function(data) {
+              var results = [];
+              if (data.resourceSets.length > 0) {
+                for (var i = data.resourceSets[0].resources.length - 1; i >= 0; i--) {
+                  var resource = data.resourceSets[0].resources[i], bbox = resource.bbox;
+                  results[i] = {
+                    name: resource.name,
+                    bbox: import_leaflet3.default.latLngBounds([bbox[0], bbox[1]], [bbox[2], bbox[3]]),
+                    center: import_leaflet3.default.latLng(resource.point.coordinates)
+                  };
+                }
+              }
+              cb.call(context, results);
+            },
+            this,
+            "jsonp"
+          );
+        },
+        reverse: function(location, scale, cb, context) {
+          jsonp(
+            "//dev.virtualearth.net/REST/v1/Locations/" + location.lat + "," + location.lng,
+            {
+              key: this.key
+            },
+            function(data) {
+              var results = [];
+              for (var i = data.resourceSets[0].resources.length - 1; i >= 0; i--) {
+                var resource = data.resourceSets[0].resources[i], bbox = resource.bbox;
+                results[i] = {
+                  name: resource.name,
+                  bbox: import_leaflet3.default.latLngBounds([bbox[0], bbox[1]], [bbox[2], bbox[3]]),
+                  center: import_leaflet3.default.latLng(resource.point.coordinates)
+                };
+              }
+              cb.call(context, results);
+            },
+            this,
+            "jsonp"
+          );
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/google.js
+  function google(key, options) {
+    return new Google(key, options);
+  }
+  var import_leaflet4, Google;
+  var init_google = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/google.js"() {
+      import_leaflet4 = __toESM(require_leaflet_src());
+      init_util();
+      Google = import_leaflet4.default.Class.extend({
+        options: {
+          serviceUrl: "https://maps.googleapis.com/maps/api/geocode/json",
+          geocodingQueryParams: {},
+          reverseQueryParams: {}
+        },
+        initialize: function(key, options) {
+          this._key = key;
+          import_leaflet4.default.setOptions(this, options);
+          this.options.serviceUrl = this.options.service_url || this.options.serviceUrl;
+        },
+        geocode: function(query, cb, context) {
+          var params = {
+            address: query
+          };
+          if (this._key && this._key.length) {
+            params.key = this._key;
+          }
+          params = import_leaflet4.default.Util.extend(params, this.options.geocodingQueryParams);
+          getJSON(this.options.serviceUrl, params, function(data) {
+            var results = [], loc, latLng2, latLngBounds;
+            if (data.results && data.results.length) {
+              for (var i = 0; i <= data.results.length - 1; i++) {
+                loc = data.results[i];
+                latLng2 = import_leaflet4.default.latLng(loc.geometry.location);
+                latLngBounds = import_leaflet4.default.latLngBounds(
+                  import_leaflet4.default.latLng(loc.geometry.viewport.northeast),
+                  import_leaflet4.default.latLng(loc.geometry.viewport.southwest)
+                );
+                results[i] = {
+                  name: loc.formatted_address,
+                  bbox: latLngBounds,
+                  center: latLng2,
+                  properties: loc.address_components
+                };
+              }
+            }
+            cb.call(context, results);
+          });
+        },
+        reverse: function(location, scale, cb, context) {
+          var params = {
+            latlng: encodeURIComponent(location.lat) + "," + encodeURIComponent(location.lng)
+          };
+          params = import_leaflet4.default.Util.extend(params, this.options.reverseQueryParams);
+          if (this._key && this._key.length) {
+            params.key = this._key;
+          }
+          getJSON(this.options.serviceUrl, params, function(data) {
+            var results = [], loc, latLng2, latLngBounds;
+            if (data.results && data.results.length) {
+              for (var i = 0; i <= data.results.length - 1; i++) {
+                loc = data.results[i];
+                latLng2 = import_leaflet4.default.latLng(loc.geometry.location);
+                latLngBounds = import_leaflet4.default.latLngBounds(
+                  import_leaflet4.default.latLng(loc.geometry.viewport.northeast),
+                  import_leaflet4.default.latLng(loc.geometry.viewport.southwest)
+                );
+                results[i] = {
+                  name: loc.formatted_address,
+                  bbox: latLngBounds,
+                  center: latLng2,
+                  properties: loc.address_components
+                };
+              }
+            }
+            cb.call(context, results);
+          });
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/here.js
+  function here(options) {
+    return new HERE(options);
+  }
+  var import_leaflet5, HERE;
+  var init_here = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/here.js"() {
+      import_leaflet5 = __toESM(require_leaflet_src());
+      init_util();
+      HERE = import_leaflet5.default.Class.extend({
+        options: {
+          geocodeUrl: "https://geocoder.api.here.com/6.2/geocode.json",
+          reverseGeocodeUrl: "https://reverse.geocoder.api.here.com/6.2/reversegeocode.json",
+          app_id: "<insert your app_id here>",
+          app_code: "<insert your app_code here>",
+          geocodingQueryParams: {},
+          reverseQueryParams: {},
+          reverseGeocodeProxRadius: null
+        },
+        initialize: function(options) {
+          import_leaflet5.default.setOptions(this, options);
+        },
+        geocode: function(query, cb, context) {
+          var params = {
+            searchtext: query,
+            gen: 9,
+            app_id: this.options.app_id,
+            app_code: this.options.app_code,
+            jsonattributes: 1
+          };
+          params = import_leaflet5.default.Util.extend(params, this.options.geocodingQueryParams);
+          this.getJSON(this.options.geocodeUrl, params, cb, context);
+        },
+        reverse: function(location, scale, cb, context) {
+          var _proxRadius = this.options.reverseGeocodeProxRadius ? this.options.reverseGeocodeProxRadius : null;
+          var proxRadius = _proxRadius ? "," + encodeURIComponent(_proxRadius) : "";
+          var params = {
+            prox: encodeURIComponent(location.lat) + "," + encodeURIComponent(location.lng) + proxRadius,
+            mode: "retrieveAddresses",
+            app_id: this.options.app_id,
+            app_code: this.options.app_code,
+            gen: 9,
+            jsonattributes: 1
+          };
+          params = import_leaflet5.default.Util.extend(params, this.options.reverseQueryParams);
+          this.getJSON(this.options.reverseGeocodeUrl, params, cb, context);
+        },
+        getJSON: function(url, params, cb, context) {
+          getJSON(url, params, function(data) {
+            var results = [], loc, latLng2, latLngBounds;
+            if (data.response.view && data.response.view.length) {
+              for (var i = 0; i <= data.response.view[0].result.length - 1; i++) {
+                loc = data.response.view[0].result[i].location;
+                latLng2 = import_leaflet5.default.latLng(loc.displayPosition.latitude, loc.displayPosition.longitude);
+                latLngBounds = import_leaflet5.default.latLngBounds(
+                  import_leaflet5.default.latLng(loc.mapView.topLeft.latitude, loc.mapView.topLeft.longitude),
+                  import_leaflet5.default.latLng(loc.mapView.bottomRight.latitude, loc.mapView.bottomRight.longitude)
+                );
+                results[i] = {
+                  name: loc.address.label,
+                  properties: loc.address,
+                  bbox: latLngBounds,
+                  center: latLng2
+                };
+              }
+            }
+            cb.call(context, results);
+          });
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/latlng.js
+  function latLng(options) {
+    return new LatLng(options);
+  }
+  var import_leaflet6, LatLng;
+  var init_latlng = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/latlng.js"() {
+      import_leaflet6 = __toESM(require_leaflet_src());
+      LatLng = import_leaflet6.default.Class.extend({
+        options: {
+          // the next geocoder to use
+          next: void 0,
+          sizeInMeters: 1e4
+        },
+        initialize: function(options) {
+          import_leaflet6.default.Util.setOptions(this, options);
+        },
+        geocode: function(query, cb, context) {
+          var match;
+          var center;
+          if (match = query.match(/^([NS])\s*(\d{1,3}(?:\.\d*)?)\W*([EW])\s*(\d{1,3}(?:\.\d*)?)$/)) {
+            center = import_leaflet6.default.latLng(
+              (/N/i.test(match[1]) ? 1 : -1) * parseFloat(match[2]),
+              (/E/i.test(match[3]) ? 1 : -1) * parseFloat(match[4])
+            );
+          } else if (match = query.match(/^(\d{1,3}(?:\.\d*)?)\s*([NS])\W*(\d{1,3}(?:\.\d*)?)\s*([EW])$/)) {
+            center = import_leaflet6.default.latLng(
+              (/N/i.test(match[2]) ? 1 : -1) * parseFloat(match[1]),
+              (/E/i.test(match[4]) ? 1 : -1) * parseFloat(match[3])
+            );
+          } else if (match = query.match(
+            /^([NS])\s*(\d{1,3})°?\s*(\d{1,3}(?:\.\d*)?)?['′]?\W*([EW])\s*(\d{1,3})°?\s*(\d{1,3}(?:\.\d*)?)?['′]?$/
+          )) {
+            center = import_leaflet6.default.latLng(
+              (/N/i.test(match[1]) ? 1 : -1) * (parseFloat(match[2]) + parseFloat(match[3] / 60)),
+              (/E/i.test(match[4]) ? 1 : -1) * (parseFloat(match[5]) + parseFloat(match[6] / 60))
+            );
+          } else if (match = query.match(
+            /^(\d{1,3})°?\s*(\d{1,3}(?:\.\d*)?)?['′]?\s*([NS])\W*(\d{1,3})°?\s*(\d{1,3}(?:\.\d*)?)?['′]?\s*([EW])$/
+          )) {
+            center = import_leaflet6.default.latLng(
+              (/N/i.test(match[3]) ? 1 : -1) * (parseFloat(match[1]) + parseFloat(match[2] / 60)),
+              (/E/i.test(match[6]) ? 1 : -1) * (parseFloat(match[4]) + parseFloat(match[5] / 60))
+            );
+          } else if (match = query.match(
+            /^([NS])\s*(\d{1,3})°?\s*(\d{1,2})['′]?\s*(\d{1,3}(?:\.\d*)?)?["″]?\W*([EW])\s*(\d{1,3})°?\s*(\d{1,2})['′]?\s*(\d{1,3}(?:\.\d*)?)?["″]?$/
+          )) {
+            center = import_leaflet6.default.latLng(
+              (/N/i.test(match[1]) ? 1 : -1) * (parseFloat(match[2]) + parseFloat(match[3] / 60 + parseFloat(match[4] / 3600))),
+              (/E/i.test(match[5]) ? 1 : -1) * (parseFloat(match[6]) + parseFloat(match[7] / 60) + parseFloat(match[8] / 3600))
+            );
+          } else if (match = query.match(
+            /^(\d{1,3})°?\s*(\d{1,2})['′]?\s*(\d{1,3}(?:\.\d*)?)?["″]\s*([NS])\W*(\d{1,3})°?\s*(\d{1,2})['′]?\s*(\d{1,3}(?:\.\d*)?)?["″]?\s*([EW])$/
+          )) {
+            center = import_leaflet6.default.latLng(
+              (/N/i.test(match[4]) ? 1 : -1) * (parseFloat(match[1]) + parseFloat(match[2] / 60 + parseFloat(match[3] / 3600))),
+              (/E/i.test(match[8]) ? 1 : -1) * (parseFloat(match[5]) + parseFloat(match[6] / 60) + parseFloat(match[7] / 3600))
+            );
+          } else if (match = query.match(/^\s*([+-]?\d+(?:\.\d*)?)\s*[\s,]\s*([+-]?\d+(?:\.\d*)?)\s*$/)) {
+            center = import_leaflet6.default.latLng(parseFloat(match[1]), parseFloat(match[2]));
+          }
+          if (center) {
+            var results = [
+              {
+                name: query,
+                center,
+                bbox: center.toBounds(this.options.sizeInMeters)
+              }
+            ];
+            cb.call(context, results);
+          } else if (this.options.next) {
+            this.options.next.geocode(query, cb, context);
+          }
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/mapbox.js
+  function mapbox(accessToken, options) {
+    return new Mapbox(accessToken, options);
+  }
+  var import_leaflet7, Mapbox;
+  var init_mapbox = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/mapbox.js"() {
+      import_leaflet7 = __toESM(require_leaflet_src());
+      init_util();
+      Mapbox = import_leaflet7.default.Class.extend({
+        options: {
+          serviceUrl: "https://api.mapbox.com/geocoding/v5/mapbox.places/",
+          geocodingQueryParams: {},
+          reverseQueryParams: {}
+        },
+        initialize: function(accessToken, options) {
+          import_leaflet7.default.setOptions(this, options);
+          this.options.geocodingQueryParams.access_token = accessToken;
+          this.options.reverseQueryParams.access_token = accessToken;
+        },
+        geocode: function(query, cb, context) {
+          var params = this.options.geocodingQueryParams;
+          if (params.proximity !== void 0 && params.proximity.lat !== void 0 && params.proximity.lng !== void 0) {
+            params.proximity = params.proximity.lng + "," + params.proximity.lat;
+          }
+          getJSON(this.options.serviceUrl + encodeURIComponent(query) + ".json", params, function(data) {
+            var results = [], loc, latLng2, latLngBounds;
+            if (data.features && data.features.length) {
+              for (var i = 0; i <= data.features.length - 1; i++) {
+                loc = data.features[i];
+                latLng2 = import_leaflet7.default.latLng(loc.center.reverse());
+                if (loc.bbox) {
+                  latLngBounds = import_leaflet7.default.latLngBounds(
+                    import_leaflet7.default.latLng(loc.bbox.slice(0, 2).reverse()),
+                    import_leaflet7.default.latLng(loc.bbox.slice(2, 4).reverse())
+                  );
+                } else {
+                  latLngBounds = import_leaflet7.default.latLngBounds(latLng2, latLng2);
+                }
+                var properties = {
+                  text: loc.text,
+                  address: loc.address
+                };
+                for (var j = 0; j < (loc.context || []).length; j++) {
+                  var id = loc.context[j].id.split(".")[0];
+                  properties[id] = loc.context[j].text;
+                  if (loc.context[j].short_code) {
+                    properties["countryShortCode"] = loc.context[j].short_code;
+                  }
+                }
+                results[i] = {
+                  name: loc.place_name,
+                  bbox: latLngBounds,
+                  center: latLng2,
+                  properties
+                };
+              }
+            }
+            cb.call(context, results);
+          });
+        },
+        suggest: function(query, cb, context) {
+          return this.geocode(query, cb, context);
+        },
+        reverse: function(location, scale, cb, context) {
+          getJSON(
+            this.options.serviceUrl + encodeURIComponent(location.lng) + "," + encodeURIComponent(location.lat) + ".json",
+            this.options.reverseQueryParams,
+            function(data) {
+              var results = [], loc, latLng2, latLngBounds;
+              if (data.features && data.features.length) {
+                for (var i = 0; i <= data.features.length - 1; i++) {
+                  loc = data.features[i];
+                  latLng2 = import_leaflet7.default.latLng(loc.center.reverse());
+                  if (loc.bbox) {
+                    latLngBounds = import_leaflet7.default.latLngBounds(
+                      import_leaflet7.default.latLng(loc.bbox.slice(0, 2).reverse()),
+                      import_leaflet7.default.latLng(loc.bbox.slice(2, 4).reverse())
+                    );
+                  } else {
+                    latLngBounds = import_leaflet7.default.latLngBounds(latLng2, latLng2);
+                  }
+                  results[i] = {
+                    name: loc.place_name,
+                    bbox: latLngBounds,
+                    center: latLng2
+                  };
+                }
+              }
+              cb.call(context, results);
+            }
+          );
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/mapquest.js
+  function mapQuest(key, options) {
+    return new MapQuest(key, options);
+  }
+  var import_leaflet8, MapQuest;
+  var init_mapquest = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/mapquest.js"() {
+      import_leaflet8 = __toESM(require_leaflet_src());
+      init_util();
+      MapQuest = import_leaflet8.default.Class.extend({
+        options: {
+          serviceUrl: "https://www.mapquestapi.com/geocoding/v1"
+        },
+        initialize: function(key, options) {
+          this._key = decodeURIComponent(key);
+          import_leaflet8.default.Util.setOptions(this, options);
+        },
+        _formatName: function() {
+          var r = [], i;
+          for (i = 0; i < arguments.length; i++) {
+            if (arguments[i]) {
+              r.push(arguments[i]);
+            }
+          }
+          return r.join(", ");
+        },
+        geocode: function(query, cb, context) {
+          getJSON(
+            this.options.serviceUrl + "/address",
+            {
+              key: this._key,
+              location: query,
+              limit: 5,
+              outFormat: "json"
+            },
+            import_leaflet8.default.bind(function(data) {
+              var results = [], loc, latLng2;
+              if (data.results && data.results[0].locations) {
+                for (var i = data.results[0].locations.length - 1; i >= 0; i--) {
+                  loc = data.results[0].locations[i];
+                  latLng2 = import_leaflet8.default.latLng(loc.latLng);
+                  results[i] = {
+                    name: this._formatName(loc.street, loc.adminArea4, loc.adminArea3, loc.adminArea1),
+                    bbox: import_leaflet8.default.latLngBounds(latLng2, latLng2),
+                    center: latLng2
+                  };
+                }
+              }
+              cb.call(context, results);
+            }, this)
+          );
+        },
+        reverse: function(location, scale, cb, context) {
+          getJSON(
+            this.options.serviceUrl + "/reverse",
+            {
+              key: this._key,
+              location: location.lat + "," + location.lng,
+              outputFormat: "json"
+            },
+            import_leaflet8.default.bind(function(data) {
+              var results = [], loc, latLng2;
+              if (data.results && data.results[0].locations) {
+                for (var i = data.results[0].locations.length - 1; i >= 0; i--) {
+                  loc = data.results[0].locations[i];
+                  latLng2 = import_leaflet8.default.latLng(loc.latLng);
+                  results[i] = {
+                    name: this._formatName(loc.street, loc.adminArea4, loc.adminArea3, loc.adminArea1),
+                    bbox: import_leaflet8.default.latLngBounds(latLng2, latLng2),
+                    center: latLng2
+                  };
+                }
+              }
+              cb.call(context, results);
+            }, this)
+          );
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/neutrino.js
+  function neutrino(accessToken) {
+    return new Neutrino(accessToken);
+  }
+  var import_leaflet9, Neutrino;
+  var init_neutrino = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/neutrino.js"() {
+      import_leaflet9 = __toESM(require_leaflet_src());
+      init_util();
+      Neutrino = import_leaflet9.default.Class.extend({
+        options: {
+          userId: "<insert your userId here>",
+          apiKey: "<insert your apiKey here>",
+          serviceUrl: "https://neutrinoapi.com/"
+        },
+        initialize: function(options) {
+          import_leaflet9.default.Util.setOptions(this, options);
+        },
+        // https://www.neutrinoapi.com/api/geocode-address/
+        geocode: function(query, cb, context) {
+          getJSON(
+            this.options.serviceUrl + "geocode-address",
+            {
+              apiKey: this.options.apiKey,
+              userId: this.options.userId,
+              //get three words and make a dot based string
+              address: query.split(/\s+/).join(".")
+            },
+            function(data) {
+              var results = [], latLng2, latLngBounds;
+              if (data.locations) {
+                data.geometry = data.locations[0];
+                latLng2 = import_leaflet9.default.latLng(data.geometry["latitude"], data.geometry["longitude"]);
+                latLngBounds = import_leaflet9.default.latLngBounds(latLng2, latLng2);
+                results[0] = {
+                  name: data.geometry.address,
+                  bbox: latLngBounds,
+                  center: latLng2
+                };
+              }
+              cb.call(context, results);
+            }
+          );
+        },
+        suggest: function(query, cb, context) {
+          return this.geocode(query, cb, context);
+        },
+        // https://www.neutrinoapi.com/api/geocode-reverse/
+        reverse: function(location, scale, cb, context) {
+          getJSON(
+            this.options.serviceUrl + "geocode-reverse",
+            {
+              apiKey: this.options.apiKey,
+              userId: this.options.userId,
+              latitude: location.lat,
+              longitude: location.lng
+            },
+            function(data) {
+              var results = [], latLng2, latLngBounds;
+              if (data.status.status == 200 && data.found) {
+                latLng2 = import_leaflet9.default.latLng(location.lat, location.lng);
+                latLngBounds = import_leaflet9.default.latLngBounds(latLng2, latLng2);
+                results[0] = {
+                  name: data.address,
+                  bbox: latLngBounds,
+                  center: latLng2
+                };
+              }
+              cb.call(context, results);
+            }
+          );
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/nominatim.js
+  function nominatim(options) {
+    return new Nominatim(options);
+  }
+  var import_leaflet10, Nominatim;
+  var init_nominatim = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/nominatim.js"() {
+      import_leaflet10 = __toESM(require_leaflet_src());
+      init_util();
+      Nominatim = import_leaflet10.default.Class.extend({
+        options: {
+          serviceUrl: "https://nominatim.openstreetmap.org/",
+          geocodingQueryParams: {},
+          reverseQueryParams: {},
+          htmlTemplate: function(r) {
+            var a = r.address, className, parts = [];
+            if (a.road || a.building) {
+              parts.push("{building} {road} {house_number}");
+            }
+            if (a.city || a.town || a.village || a.hamlet) {
+              className = parts.length > 0 ? "leaflet-control-geocoder-address-detail" : "";
+              parts.push(
+                '<span class="' + className + '">{postcode} {city} {town} {village} {hamlet}</span>'
+              );
+            }
+            if (a.state || a.country) {
+              className = parts.length > 0 ? "leaflet-control-geocoder-address-context" : "";
+              parts.push('<span class="' + className + '">{state} {country}</span>');
+            }
+            return template(parts.join("<br/>"), a, true);
+          }
+        },
+        initialize: function(options) {
+          import_leaflet10.default.Util.setOptions(this, options);
+        },
+        geocode: function(query, cb, context) {
+          getJSON(
+            this.options.serviceUrl + "search",
+            import_leaflet10.default.extend(
+              {
+                q: query,
+                limit: 5,
+                format: "json",
+                addressdetails: 1
+              },
+              this.options.geocodingQueryParams
+            ),
+            import_leaflet10.default.bind(function(data) {
+              var results = [];
+              for (var i = data.length - 1; i >= 0; i--) {
+                var bbox = data[i].boundingbox;
+                for (var j = 0; j < 4; j++)
+                  bbox[j] = parseFloat(bbox[j]);
+                results[i] = {
+                  icon: data[i].icon,
+                  name: data[i].display_name,
+                  html: this.options.htmlTemplate ? this.options.htmlTemplate(data[i]) : void 0,
+                  bbox: import_leaflet10.default.latLngBounds([bbox[0], bbox[2]], [bbox[1], bbox[3]]),
+                  center: import_leaflet10.default.latLng(data[i].lat, data[i].lon),
+                  properties: data[i]
+                };
+              }
+              cb.call(context, results);
+            }, this)
+          );
+        },
+        reverse: function(location, scale, cb, context) {
+          getJSON(
+            this.options.serviceUrl + "reverse",
+            import_leaflet10.default.extend(
+              {
+                lat: location.lat,
+                lon: location.lng,
+                zoom: Math.round(Math.log(scale / 256) / Math.log(2)),
+                addressdetails: 1,
+                format: "json"
+              },
+              this.options.reverseQueryParams
+            ),
+            import_leaflet10.default.bind(function(data) {
+              var result = [], loc;
+              if (data && data.lat && data.lon) {
+                loc = import_leaflet10.default.latLng(data.lat, data.lon);
+                result.push({
+                  name: data.display_name,
+                  html: this.options.htmlTemplate ? this.options.htmlTemplate(data) : void 0,
+                  center: loc,
+                  bounds: import_leaflet10.default.latLngBounds(loc, loc),
+                  properties: data
+                });
+              }
+              cb.call(context, result);
+            }, this)
+          );
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/open-location-code.js
+  function openLocationCode(options) {
+    return new OpenLocationCode(options);
+  }
+  var import_leaflet11, OpenLocationCode;
+  var init_open_location_code = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/open-location-code.js"() {
+      import_leaflet11 = __toESM(require_leaflet_src());
+      OpenLocationCode = import_leaflet11.default.Class.extend({
+        options: {
+          OpenLocationCode: void 0,
+          codeLength: void 0
+        },
+        initialize: function(options) {
+          import_leaflet11.default.setOptions(this, options);
+        },
+        geocode: function(query, cb, context) {
+          try {
+            var decoded = this.options.OpenLocationCode.decode(query);
+            var result = {
+              name: query,
+              center: import_leaflet11.default.latLng(decoded.latitudeCenter, decoded.longitudeCenter),
+              bbox: import_leaflet11.default.latLngBounds(
+                import_leaflet11.default.latLng(decoded.latitudeLo, decoded.longitudeLo),
+                import_leaflet11.default.latLng(decoded.latitudeHi, decoded.longitudeHi)
+              )
+            };
+            cb.call(context, [result]);
+          } catch (e) {
+            console.warn(e);
+            cb.call(context, []);
+          }
+        },
+        reverse: function(location, scale, cb, context) {
+          try {
+            var code = this.options.OpenLocationCode.encode(
+              location.lat,
+              location.lng,
+              this.options.codeLength
+            );
+            var result = {
+              name: code,
+              center: import_leaflet11.default.latLng(location.lat, location.lng),
+              bbox: import_leaflet11.default.latLngBounds(
+                import_leaflet11.default.latLng(location.lat, location.lng),
+                import_leaflet11.default.latLng(location.lat, location.lng)
+              )
+            };
+            cb.call(context, [result]);
+          } catch (e) {
+            console.warn(e);
+            cb.call(context, []);
+          }
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/opencage.js
+  function opencage(apiKey, options) {
+    return new OpenCage(apiKey, options);
+  }
+  var import_leaflet12, OpenCage;
+  var init_opencage = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/opencage.js"() {
+      import_leaflet12 = __toESM(require_leaflet_src());
+      init_util();
+      OpenCage = import_leaflet12.default.Class.extend({
+        options: {
+          serviceUrl: "https://api.opencagedata.com/geocode/v1/json",
+          geocodingQueryParams: {},
+          reverseQueryParams: {}
+        },
+        initialize: function(apiKey, options) {
+          import_leaflet12.default.setOptions(this, options);
+          this._accessToken = apiKey;
+        },
+        geocode: function(query, cb, context) {
+          var params = {
+            key: this._accessToken,
+            q: query
+          };
+          params = import_leaflet12.default.extend(params, this.options.geocodingQueryParams);
+          getJSON(this.options.serviceUrl, params, function(data) {
+            var results = [], latLng2, latLngBounds, loc;
+            if (data.results && data.results.length) {
+              for (var i = 0; i < data.results.length; i++) {
+                loc = data.results[i];
+                latLng2 = import_leaflet12.default.latLng(loc.geometry);
+                if (loc.annotations && loc.annotations.bounds) {
+                  latLngBounds = import_leaflet12.default.latLngBounds(
+                    import_leaflet12.default.latLng(loc.annotations.bounds.northeast),
+                    import_leaflet12.default.latLng(loc.annotations.bounds.southwest)
+                  );
+                } else {
+                  latLngBounds = import_leaflet12.default.latLngBounds(latLng2, latLng2);
+                }
+                results.push({
+                  name: loc.formatted,
+                  bbox: latLngBounds,
+                  center: latLng2
+                });
+              }
+            }
+            cb.call(context, results);
+          });
+        },
+        suggest: function(query, cb, context) {
+          return this.geocode(query, cb, context);
+        },
+        reverse: function(location, scale, cb, context) {
+          var params = {
+            key: this._accessToken,
+            q: [location.lat, location.lng].join(",")
+          };
+          params = import_leaflet12.default.extend(params, this.options.reverseQueryParams);
+          getJSON(this.options.serviceUrl, params, function(data) {
+            var results = [], latLng2, latLngBounds, loc;
+            if (data.results && data.results.length) {
+              for (var i = 0; i < data.results.length; i++) {
+                loc = data.results[i];
+                latLng2 = import_leaflet12.default.latLng(loc.geometry);
+                if (loc.annotations && loc.annotations.bounds) {
+                  latLngBounds = import_leaflet12.default.latLngBounds(
+                    import_leaflet12.default.latLng(loc.annotations.bounds.northeast),
+                    import_leaflet12.default.latLng(loc.annotations.bounds.southwest)
+                  );
+                } else {
+                  latLngBounds = import_leaflet12.default.latLngBounds(latLng2, latLng2);
+                }
+                results.push({
+                  name: loc.formatted,
+                  bbox: latLngBounds,
+                  center: latLng2
+                });
+              }
+            }
+            cb.call(context, results);
+          });
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/pelias.js
+  function pelias(apiKey, options) {
+    return new Pelias(apiKey, options);
+  }
+  function openrouteservice(apiKey, options) {
+    return new Openrouteservice(apiKey, options);
+  }
+  var import_leaflet13, Pelias, GeocodeEarth, geocodeEarth, Mapzen, mapzen, Openrouteservice;
+  var init_pelias = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/pelias.js"() {
+      import_leaflet13 = __toESM(require_leaflet_src());
+      init_util();
+      Pelias = import_leaflet13.default.Class.extend({
+        options: {
+          serviceUrl: "https://api.geocode.earth/v1",
+          geocodingQueryParams: {},
+          reverseQueryParams: {}
+        },
+        initialize: function(apiKey, options) {
+          import_leaflet13.default.Util.setOptions(this, options);
+          this._apiKey = apiKey;
+          this._lastSuggest = 0;
+        },
+        geocode: function(query, cb, context) {
+          var _this = this;
+          getJSON(
+            this.options.serviceUrl + "/search",
+            import_leaflet13.default.extend(
+              {
+                api_key: this._apiKey,
+                text: query
+              },
+              this.options.geocodingQueryParams
+            ),
+            function(data) {
+              cb.call(context, _this._parseResults(data, "bbox"));
+            }
+          );
+        },
+        suggest: function(query, cb, context) {
+          var _this = this;
+          getJSON(
+            this.options.serviceUrl + "/autocomplete",
+            import_leaflet13.default.extend(
+              {
+                api_key: this._apiKey,
+                text: query
+              },
+              this.options.geocodingQueryParams
+            ),
+            import_leaflet13.default.bind(function(data) {
+              if (data.geocoding.timestamp > this._lastSuggest) {
+                this._lastSuggest = data.geocoding.timestamp;
+                cb.call(context, _this._parseResults(data, "bbox"));
+              }
+            }, this)
+          );
+        },
+        reverse: function(location, scale, cb, context) {
+          var _this = this;
+          getJSON(
+            this.options.serviceUrl + "/reverse",
+            import_leaflet13.default.extend(
+              {
+                api_key: this._apiKey,
+                "point.lat": location.lat,
+                "point.lon": location.lng
+              },
+              this.options.reverseQueryParams
+            ),
+            function(data) {
+              cb.call(context, _this._parseResults(data, "bounds"));
+            }
+          );
+        },
+        _parseResults: function(data, bboxname) {
+          var results = [];
+          import_leaflet13.default.geoJson(data, {
+            pointToLayer: function(feature, latlng) {
+              return import_leaflet13.default.circleMarker(latlng);
+            },
+            onEachFeature: function(feature, layer) {
+              var result = {}, bbox, center;
+              if (layer.getBounds) {
+                bbox = layer.getBounds();
+                center = bbox.getCenter();
+              } else if (layer.feature.bbox) {
+                center = layer.getLatLng();
+                bbox = import_leaflet13.default.latLngBounds(
+                  import_leaflet13.default.GeoJSON.coordsToLatLng(layer.feature.bbox.slice(0, 2)),
+                  import_leaflet13.default.GeoJSON.coordsToLatLng(layer.feature.bbox.slice(2, 4))
+                );
+              } else {
+                center = layer.getLatLng();
+                bbox = import_leaflet13.default.latLngBounds(center, center);
+              }
+              result.name = layer.feature.properties.label;
+              result.center = center;
+              result[bboxname] = bbox;
+              result.properties = layer.feature.properties;
+              results.push(result);
+            }
+          });
+          return results;
+        }
+      });
+      GeocodeEarth = Pelias;
+      geocodeEarth = pelias;
+      Mapzen = Pelias;
+      mapzen = pelias;
+      Openrouteservice = Mapzen.extend({
+        options: {
+          serviceUrl: "https://api.openrouteservice.org/geocode"
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/photon.js
+  function photon(options) {
+    return new Photon(options);
+  }
+  var import_leaflet14, Photon;
+  var init_photon = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/photon.js"() {
+      import_leaflet14 = __toESM(require_leaflet_src());
+      init_util();
+      Photon = import_leaflet14.default.Class.extend({
+        options: {
+          serviceUrl: "https://photon.komoot.de/api/",
+          reverseUrl: "https://photon.komoot.de/reverse/",
+          nameProperties: ["name", "street", "suburb", "hamlet", "town", "city", "state", "country"]
+        },
+        initialize: function(options) {
+          import_leaflet14.default.setOptions(this, options);
+        },
+        geocode: function(query, cb, context) {
+          var params = import_leaflet14.default.extend(
+            {
+              q: query
+            },
+            this.options.geocodingQueryParams
+          );
+          getJSON(
+            this.options.serviceUrl,
+            params,
+            import_leaflet14.default.bind(function(data) {
+              cb.call(context, this._decodeFeatures(data));
+            }, this)
+          );
+        },
+        suggest: function(query, cb, context) {
+          return this.geocode(query, cb, context);
+        },
+        reverse: function(latLng2, scale, cb, context) {
+          var params = import_leaflet14.default.extend(
+            {
+              lat: latLng2.lat,
+              lon: latLng2.lng
+            },
+            this.options.reverseQueryParams
+          );
+          getJSON(
+            this.options.reverseUrl,
+            params,
+            import_leaflet14.default.bind(function(data) {
+              cb.call(context, this._decodeFeatures(data));
+            }, this)
+          );
+        },
+        _decodeFeatures: function(data) {
+          var results = [], i, f, c, latLng2, extent, bbox;
+          if (data && data.features) {
+            for (i = 0; i < data.features.length; i++) {
+              f = data.features[i];
+              c = f.geometry.coordinates;
+              latLng2 = import_leaflet14.default.latLng(c[1], c[0]);
+              extent = f.properties.extent;
+              if (extent) {
+                bbox = import_leaflet14.default.latLngBounds([extent[1], extent[0]], [extent[3], extent[2]]);
+              } else {
+                bbox = import_leaflet14.default.latLngBounds(latLng2, latLng2);
+              }
+              results.push({
+                name: this._decodeFeatureName(f),
+                html: this.options.htmlTemplate ? this.options.htmlTemplate(f) : void 0,
+                center: latLng2,
+                bbox,
+                properties: f.properties
+              });
+            }
+          }
+          return results;
+        },
+        _decodeFeatureName: function(f) {
+          return (this.options.nameProperties || []).map(function(p) {
+            return f.properties[p];
+          }).filter(function(v) {
+            return !!v;
+          }).join(", ");
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/what3words.js
+  function what3words(accessToken) {
+    return new What3Words(accessToken);
+  }
+  var import_leaflet15, What3Words;
+  var init_what3words = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/what3words.js"() {
+      import_leaflet15 = __toESM(require_leaflet_src());
+      init_util();
+      What3Words = import_leaflet15.default.Class.extend({
+        options: {
+          serviceUrl: "https://api.what3words.com/v2/"
+        },
+        initialize: function(accessToken) {
+          this._accessToken = accessToken;
+        },
+        geocode: function(query, cb, context) {
+          getJSON(
+            this.options.serviceUrl + "forward",
+            {
+              key: this._accessToken,
+              addr: query.split(/\s+/).join(".")
+            },
+            function(data) {
+              var results = [], latLng2, latLngBounds;
+              if (data.geometry) {
+                latLng2 = import_leaflet15.default.latLng(data.geometry["lat"], data.geometry["lng"]);
+                latLngBounds = import_leaflet15.default.latLngBounds(latLng2, latLng2);
+                results[0] = {
+                  name: data.words,
+                  bbox: latLngBounds,
+                  center: latLng2
+                };
+              }
+              cb.call(context, results);
+            }
+          );
+        },
+        suggest: function(query, cb, context) {
+          return this.geocode(query, cb, context);
+        },
+        reverse: function(location, scale, cb, context) {
+          getJSON(
+            this.options.serviceUrl + "reverse",
+            {
+              key: this._accessToken,
+              coords: [location.lat, location.lng].join(",")
+            },
+            function(data) {
+              var results = [], latLng2, latLngBounds;
+              if (data.status.status == 200) {
+                latLng2 = import_leaflet15.default.latLng(data.geometry["lat"], data.geometry["lng"]);
+                latLngBounds = import_leaflet15.default.latLngBounds(latLng2, latLng2);
+                results[0] = {
+                  name: data.words,
+                  bbox: latLngBounds,
+                  center: latLng2
+                };
+              }
+              cb.call(context, results);
+            }
+          );
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/geocoders/index.js
+  var geocoders_exports = {};
+  __export(geocoders_exports, {
+    ArcGis: () => ArcGis,
+    Bing: () => Bing,
+    GeocodeEarth: () => GeocodeEarth,
+    Google: () => Google,
+    HERE: () => HERE,
+    LatLng: () => LatLng,
+    MapQuest: () => MapQuest,
+    Mapbox: () => Mapbox,
+    Mapzen: () => Mapzen,
+    Neutrino: () => Neutrino,
+    Nominatim: () => Nominatim,
+    OpenCage: () => OpenCage,
+    OpenLocationCode: () => OpenLocationCode,
+    Openrouteservice: () => Openrouteservice,
+    Pelias: () => Pelias,
+    Photon: () => Photon,
+    What3Words: () => What3Words,
+    arcgis: () => arcgis,
+    bing: () => bing,
+    geocodeEarth: () => geocodeEarth,
+    google: () => google,
+    here: () => here,
+    latLng: () => latLng,
+    mapQuest: () => mapQuest,
+    mapbox: () => mapbox,
+    mapzen: () => mapzen,
+    neutrino: () => neutrino,
+    nominatim: () => nominatim,
+    openLocationCode: () => openLocationCode,
+    opencage: () => opencage,
+    openrouteservice: () => openrouteservice,
+    pelias: () => pelias,
+    photon: () => photon,
+    what3words: () => what3words
+  });
+  var init_geocoders = __esm({
+    "node_modules/leaflet-control-geocoder/src/geocoders/index.js"() {
+      init_arcgis();
+      init_bing();
+      init_google();
+      init_here();
+      init_latlng();
+      init_mapbox();
+      init_mapquest();
+      init_neutrino();
+      init_nominatim();
+      init_open_location_code();
+      init_opencage();
+      init_pelias();
+      init_photon();
+      init_what3words();
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/control.js
+  function geocoder(options) {
+    return new Geocoder(options);
+  }
+  var import_leaflet16, Geocoder;
+  var init_control = __esm({
+    "node_modules/leaflet-control-geocoder/src/control.js"() {
+      import_leaflet16 = __toESM(require_leaflet_src());
+      init_geocoders();
+      Geocoder = import_leaflet16.default.Control.extend({
+        options: {
+          showUniqueResult: true,
+          showResultIcons: false,
+          collapsed: true,
+          expand: "touch",
+          // options: touch, click, anythingelse
+          position: "topright",
+          placeholder: "Search...",
+          errorMessage: "Nothing found.",
+          iconLabel: "Initiate a new search",
+          queryMinLength: 1,
+          suggestMinLength: 3,
+          suggestTimeout: 250,
+          defaultMarkGeocode: true
+        },
+        includes: import_leaflet16.default.Evented.prototype || import_leaflet16.default.Mixin.Events,
+        initialize: function(options) {
+          import_leaflet16.default.Util.setOptions(this, options);
+          if (!this.options.geocoder) {
+            this.options.geocoder = new Nominatim();
+          }
+          this._requestCount = 0;
+        },
+        addThrobberClass: function() {
+          import_leaflet16.default.DomUtil.addClass(this._container, "leaflet-control-geocoder-throbber");
+        },
+        removeThrobberClass: function() {
+          import_leaflet16.default.DomUtil.removeClass(this._container, "leaflet-control-geocoder-throbber");
+        },
+        onAdd: function(map) {
+          var className = "leaflet-control-geocoder", container = import_leaflet16.default.DomUtil.create("div", className + " leaflet-bar"), icon = import_leaflet16.default.DomUtil.create("button", className + "-icon", container), form = this._form = import_leaflet16.default.DomUtil.create("div", className + "-form", container), input;
+          this._map = map;
+          this._container = container;
+          icon.innerHTML = "&nbsp;";
+          icon.type = "button";
+          icon.setAttribute("aria-label", this.options.iconLabel);
+          input = this._input = import_leaflet16.default.DomUtil.create("input", "", form);
+          input.type = "text";
+          input.value = this.options.query || "";
+          input.placeholder = this.options.placeholder;
+          import_leaflet16.default.DomEvent.disableClickPropagation(input);
+          this._errorElement = import_leaflet16.default.DomUtil.create("div", className + "-form-no-error", container);
+          this._errorElement.innerHTML = this.options.errorMessage;
+          this._alts = import_leaflet16.default.DomUtil.create(
+            "ul",
+            className + "-alternatives leaflet-control-geocoder-alternatives-minimized",
+            container
+          );
+          import_leaflet16.default.DomEvent.disableClickPropagation(this._alts);
+          import_leaflet16.default.DomEvent.addListener(input, "keydown", this._keydown, this);
+          if (this.options.geocoder.suggest) {
+            import_leaflet16.default.DomEvent.addListener(input, "input", this._change, this);
+          }
+          import_leaflet16.default.DomEvent.addListener(
+            input,
+            "blur",
+            function() {
+              if (this.options.collapsed && !this._preventBlurCollapse) {
+                this._collapse();
+              }
+              this._preventBlurCollapse = false;
+            },
+            this
+          );
+          if (this.options.collapsed) {
+            if (this.options.expand === "click") {
+              import_leaflet16.default.DomEvent.addListener(
+                container,
+                "click",
+                function(e) {
+                  if (e.button === 0 && e.detail !== 2) {
+                    this._toggle();
+                  }
+                },
+                this
+              );
+            } else if (this.options.expand === "touch") {
+              import_leaflet16.default.DomEvent.addListener(
+                container,
+                import_leaflet16.default.Browser.touch ? "touchstart mousedown" : "mousedown",
+                function(e) {
+                  this._toggle();
+                  e.preventDefault();
+                  e.stopPropagation();
+                },
+                this
+              );
+            } else {
+              import_leaflet16.default.DomEvent.addListener(container, "mouseover", this._expand, this);
+              import_leaflet16.default.DomEvent.addListener(container, "mouseout", this._collapse, this);
+              this._map.on("movestart", this._collapse, this);
+            }
+          } else {
+            this._expand();
+            if (import_leaflet16.default.Browser.touch) {
+              import_leaflet16.default.DomEvent.addListener(
+                container,
+                "touchstart",
+                function() {
+                  this._geocode();
+                },
+                this
+              );
+            } else {
+              import_leaflet16.default.DomEvent.addListener(
+                container,
+                "click",
+                function() {
+                  this._geocode();
+                },
+                this
+              );
+            }
+          }
+          if (this.options.defaultMarkGeocode) {
+            this.on("markgeocode", this.markGeocode, this);
+          }
+          this.on("startgeocode", this.addThrobberClass, this);
+          this.on("finishgeocode", this.removeThrobberClass, this);
+          this.on("startsuggest", this.addThrobberClass, this);
+          this.on("finishsuggest", this.removeThrobberClass, this);
+          import_leaflet16.default.DomEvent.disableClickPropagation(container);
+          return container;
+        },
+        setQuery: function(string) {
+          this._input.value = string;
+          return this;
+        },
+        _geocodeResult: function(results, suggest) {
+          if (!suggest && this.options.showUniqueResult && results.length === 1) {
+            this._geocodeResultSelected(results[0]);
+          } else if (results.length > 0) {
+            this._alts.innerHTML = "";
+            this._results = results;
+            import_leaflet16.default.DomUtil.removeClass(this._alts, "leaflet-control-geocoder-alternatives-minimized");
+            import_leaflet16.default.DomUtil.addClass(this._container, "leaflet-control-geocoder-options-open");
+            for (var i = 0; i < results.length; i++) {
+              this._alts.appendChild(this._createAlt(results[i], i));
+            }
+          } else {
+            import_leaflet16.default.DomUtil.addClass(this._container, "leaflet-control-geocoder-options-error");
+            import_leaflet16.default.DomUtil.addClass(this._errorElement, "leaflet-control-geocoder-error");
+          }
+        },
+        markGeocode: function(result) {
+          result = result.geocode || result;
+          this._map.fitBounds(result.bbox);
+          if (this._geocodeMarker) {
+            this._map.removeLayer(this._geocodeMarker);
+          }
+          this._geocodeMarker = new import_leaflet16.default.Marker(result.center).bindPopup(result.html || result.name).addTo(this._map).openPopup();
+          return this;
+        },
+        _geocode: function(suggest) {
+          var value = this._input.value;
+          if (!suggest && value.length < this.options.queryMinLength) {
+            return;
+          }
+          var requestCount = ++this._requestCount, mode = suggest ? "suggest" : "geocode", eventData = { input: value };
+          this._lastGeocode = value;
+          if (!suggest) {
+            this._clearResults();
+          }
+          this.fire("start" + mode, eventData);
+          this.options.geocoder[mode](
+            value,
+            function(results) {
+              if (requestCount === this._requestCount) {
+                eventData.results = results;
+                this.fire("finish" + mode, eventData);
+                this._geocodeResult(results, suggest);
+              }
+            },
+            this
+          );
+        },
+        _geocodeResultSelected: function(result) {
+          this.fire("markgeocode", { geocode: result });
+        },
+        _toggle: function() {
+          if (import_leaflet16.default.DomUtil.hasClass(this._container, "leaflet-control-geocoder-expanded")) {
+            this._collapse();
+          } else {
+            this._expand();
+          }
+        },
+        _expand: function() {
+          import_leaflet16.default.DomUtil.addClass(this._container, "leaflet-control-geocoder-expanded");
+          this._input.select();
+          this.fire("expand");
+        },
+        _collapse: function() {
+          import_leaflet16.default.DomUtil.removeClass(this._container, "leaflet-control-geocoder-expanded");
+          import_leaflet16.default.DomUtil.addClass(this._alts, "leaflet-control-geocoder-alternatives-minimized");
+          import_leaflet16.default.DomUtil.removeClass(this._errorElement, "leaflet-control-geocoder-error");
+          import_leaflet16.default.DomUtil.removeClass(this._container, "leaflet-control-geocoder-options-open");
+          import_leaflet16.default.DomUtil.removeClass(this._container, "leaflet-control-geocoder-options-error");
+          this._input.blur();
+          this.fire("collapse");
+        },
+        _clearResults: function() {
+          import_leaflet16.default.DomUtil.addClass(this._alts, "leaflet-control-geocoder-alternatives-minimized");
+          this._selection = null;
+          import_leaflet16.default.DomUtil.removeClass(this._errorElement, "leaflet-control-geocoder-error");
+          import_leaflet16.default.DomUtil.removeClass(this._container, "leaflet-control-geocoder-options-open");
+          import_leaflet16.default.DomUtil.removeClass(this._container, "leaflet-control-geocoder-options-error");
+        },
+        _createAlt: function(result, index) {
+          var li = import_leaflet16.default.DomUtil.create("li", ""), a = import_leaflet16.default.DomUtil.create("a", "", li), icon = this.options.showResultIcons && result.icon ? import_leaflet16.default.DomUtil.create("img", "", a) : null, text = result.html ? void 0 : document.createTextNode(result.name), mouseDownHandler = function mouseDownHandler2(e) {
+            this._preventBlurCollapse = true;
+            import_leaflet16.default.DomEvent.stop(e);
+            this._geocodeResultSelected(result);
+            import_leaflet16.default.DomEvent.on(
+              li,
+              "click touchend",
+              function() {
+                if (this.options.collapsed) {
+                  this._collapse();
+                } else {
+                  this._clearResults();
+                }
+              },
+              this
+            );
+          };
+          if (icon) {
+            icon.src = result.icon;
+          }
+          li.setAttribute("data-result-index", index);
+          if (result.html) {
+            a.innerHTML = a.innerHTML + result.html;
+          } else {
+            a.appendChild(text);
+          }
+          import_leaflet16.default.DomEvent.addListener(li, "mousedown touchstart", mouseDownHandler, this);
+          return li;
+        },
+        _keydown: function(e) {
+          var _this = this, select = function select2(dir) {
+            if (_this._selection) {
+              import_leaflet16.default.DomUtil.removeClass(_this._selection, "leaflet-control-geocoder-selected");
+              _this._selection = _this._selection[dir > 0 ? "nextSibling" : "previousSibling"];
+            }
+            if (!_this._selection) {
+              _this._selection = _this._alts[dir > 0 ? "firstChild" : "lastChild"];
+            }
+            if (_this._selection) {
+              import_leaflet16.default.DomUtil.addClass(_this._selection, "leaflet-control-geocoder-selected");
+            }
+          };
+          switch (e.keyCode) {
+            case 27:
+              if (this.options.collapsed) {
+                this._collapse();
+              } else {
+                this._clearResults();
+              }
+              break;
+            case 38:
+              select(-1);
+              break;
+            case 40:
+              select(1);
+              break;
+            case 13:
+              if (this._selection) {
+                var index = parseInt(this._selection.getAttribute("data-result-index"), 10);
+                this._geocodeResultSelected(this._results[index]);
+                this._clearResults();
+              } else {
+                this._geocode();
+              }
+              break;
+            default:
+              return;
+          }
+          import_leaflet16.default.DomEvent.preventDefault(e);
+        },
+        _change: function() {
+          var v = this._input.value;
+          if (v !== this._lastGeocode) {
+            clearTimeout(this._suggestTimeout);
+            if (v.length >= this.options.suggestMinLength) {
+              this._suggestTimeout = setTimeout(
+                import_leaflet16.default.bind(function() {
+                  this._geocode(true);
+                }, this),
+                this.options.suggestTimeout
+              );
+            } else {
+              this._clearResults();
+            }
+          }
+        }
+      });
+    }
+  });
+
+  // node_modules/leaflet-control-geocoder/src/index.js
+  var import_leaflet17;
+  var init_src = __esm({
+    "node_modules/leaflet-control-geocoder/src/index.js"() {
+      import_leaflet17 = __toESM(require_leaflet_src());
+      init_control();
+      init_geocoders();
+      import_leaflet17.default.Util.extend(Geocoder, geocoders_exports);
+      import_leaflet17.default.Util.extend(import_leaflet17.default.Control, {
+        Geocoder,
+        geocoder
+      });
+    }
+  });
+
   // lib/map_ui.js
   function fetchData(url) {
     return __async(this, null, function* () {
@@ -11640,7 +13263,7 @@
     });
   }
   function createMarker(station, status, map) {
-    const marker = import_leaflet.default.marker([station.lat, station.lon]).addTo(map);
+    const marker = import_leaflet18.default.marker([station.lat, station.lon]).addTo(map);
     marker.bindPopup(`
         <b>${station.name}</b><br>
         Adresse: ${station.address}<br>
@@ -11648,9 +13271,29 @@
         Places libres: ${status.num_docks_available}
     `);
   }
+  function createIncident(incident, map) {
+    const { location, short_description } = incident;
+    const latlng = location.polyline.split(" ").map((coord) => parseFloat(coord));
+    const marker = import_leaflet18.default.marker(latlng, {
+      icon: import_leaflet18.default.icon({
+        iconUrl: "../resources/icon-incident.png",
+        iconSize: [41, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      })
+    }).addTo(map);
+    marker.bindPopup(`
+        <b>${short_description}</b><br>
+        Description: ${incident.description}<br>
+        D\xE9but: ${incident.starttime}<br>
+        Fin: ${incident.endtime}<br>
+        Localisation: ${location.location_description}
+    `);
+  }
   function createRestaurantMarker(restaurant, map) {
-    const marker = import_leaflet.default.marker([restaurant.Latitude, restaurant.Longitude], {
-      icon: import_leaflet.default.icon({
+    const marker = import_leaflet18.default.marker([restaurant.Latitude, restaurant.Longitude], {
+      icon: import_leaflet18.default.icon({
         iconUrl: "../resources/icon-restaurant.png",
         iconSize: [41, 41],
         iconAnchor: [12, 41],
@@ -11659,21 +13302,26 @@
       })
     }).addTo(map);
     const popupContent = `
-        <b>${restaurant.Nom}</b><br>
-        Adresse: ${restaurant.Adresse}<br><br>
-        <form id="reservation-form-${restaurant.RestaurantID}">
-            <label for="nom">Nom:</label><br>
-            <input type="text" id="nom" name="nom"><br>
-            <label for="prenom">Pr\xE9nom:</label><br>
-            <input type="text" id="prenom" name="prenom"><br>
-            <label for="nbPersonne">Nombre de personnes:</label><br>
-            <input type="number" id="nbPersonne" name="nbPersonne"><br>
-            <label for="tel">T\xE9l\xE9phone:</label><br>
-            <input type="text" id="tel" name="tel"><br><br>
-            <input type="hidden" id="idRestaurant" name="idRestaurant" value="${restaurant.RestaurantID}">
-            <input type="submit" value="R\xE9server">
-        </form>
-    `;
+    <b>${restaurant.Nom}</b><br>
+    Adresse: ${restaurant.Adresse}<br><br>
+    <form id="reservation-form-${restaurant.RestaurantID}" style="display: flex; flex-direction: column; gap: 10px; max-width: 300px;">
+        <label for="nom" style="font-weight: bold; color: #333;">Nom:</label>
+        <input type="text" id="nom" name="nom" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
+        
+        <label for="prenom" style="font-weight: bold; color: #333;">Pr\xE9nom:</label>
+        <input type="text" id="prenom" name="prenom" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
+        
+        <label for="nbPersonne" style="font-weight: bold; color: #333;">Nombre de personnes:</label>
+        <input type="number" id="nbPersonne" name="nbPersonne" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
+        
+        <label for="tel" style="font-weight: bold; color: #333;">T\xE9l\xE9phone:</label>
+        <input type="text" id="tel" name="tel" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
+        
+        <input type="hidden" id="idRestaurant" name="idRestaurant" value="${restaurant.RestaurantID}">
+        
+        <input type="submit" value="R\xE9server" style="padding: 10px; border-radius: 5px; border: none; background-color: #4CAF50; color: white; font-weight: bold; cursor: pointer; font-size: 16px;">
+    </form>
+`;
     marker.bindPopup(popupContent);
     marker.on("popupopen", function() {
       const form = document.getElementById(`reservation-form-${restaurant.RestaurantID}`);
@@ -11711,8 +13359,8 @@
       try {
         const stationInfo = yield fetchData(stationInfoUrl);
         const stationStatus = yield fetchData(stationStatusUrl);
-        const map = import_leaflet.default.map("map").setView([48.683331, 6.2], 13);
-        import_leaflet.default.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        const map = import_leaflet18.default.map("map").setView([48.683331, 6.2], 13);
+        import_leaflet18.default.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 20,
           attribution: '\xA9 <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
@@ -11734,19 +13382,115 @@
         restaurantsReceived.forEach((restaurant) => {
           createRestaurantMarker(restaurant, map);
         });
+        ajouterEvenementAjoutRestaurant(map);
+        const incidentsReceived = [
+          {
+            "type": "CONSTRUCTION",
+            "description": "Chauffage urbain - Voirie: R\uFFFDduction \uFFFD une file de circulation, R\uFFFDtr\uFFFDcissement des voies",
+            "short_description": "Chauffage urbain - Voirie",
+            "starttime": "2024-06-01T00:00:00",
+            "endtime": "2024-08-30T00:00:00",
+            "location": {
+              "street": "Boulevard Louis Barthou",
+              "polyline": "48.670705110635964 6.186903512600356",
+              "location_description": "BOULEVARD LOUIS BARTHOU, VANDOEUVRE"
+            },
+            "source": {
+              "name": "M\uFFFDtropole du Grand Nancy",
+              "reference": "Grand_Nancy"
+            },
+            "updatetime": "2024-03-21T20:29:37.251429",
+            "creationtime": "2024-03-21T20:29:37.251421",
+            "id": "FrMdGN54180828"
+          },
+          {
+            "type": "CONSTRUCTION",
+            "description": "Chantier ponctuel - Voirie: D\uFFFDviation pour les pi\uFFFDtons (pas de passage interdit), Suppression d'un sens de circulation (Rue en sens unique)",
+            "short_description": "Chantier ponctuel - Voirie",
+            "starttime": "2023-06-28T00:00:00",
+            "endtime": "2024-06-28T00:00:00",
+            "location": {
+              "street": "Rue Saint-Jean",
+              "polyline": "48.69070423748256 6.182203192232047",
+              "location_description": "RUE SEMARD ST JEAN ST GEORGES, NANCY"
+            },
+            "source": {
+              "name": "M\uFFFDtropole du Grand Nancy",
+              "reference": "Grand_Nancy"
+            },
+            "updatetime": "2024-03-21T20:29:37.322720",
+            "creationtime": "2024-03-21T20:29:37.322712",
+            "id": "FrMdGN54171862"
+          }
+        ];
+        incidentsReceived.forEach((incident) => {
+          createIncident(incident, map);
+        });
       } catch (error) {
         console.error("Erreur lors de la r\xE9cup\xE9ration des donn\xE9es :", error);
       }
     });
   }
-  var import_leaflet, import_leaflet2;
+  var import_leaflet18, import_leaflet19, ajouterEvenementAjoutRestaurant;
   var init_map_ui = __esm({
     "lib/map_ui.js"() {
       init_config();
       init_dataloader();
-      import_leaflet = __toESM(require_leaflet_src());
-      import_leaflet2 = __toESM(require_leaflet_markercluster_src());
+      import_leaflet18 = __toESM(require_leaflet_src());
+      import_leaflet19 = __toESM(require_leaflet_markercluster_src());
       init_leaflet_heat();
+      init_src();
+      ajouterEvenementAjoutRestaurant = (map) => {
+        map.on("click", function(e) {
+          return __async(this, null, function* () {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            const geocoder2 = import_leaflet18.default.Control.Geocoder.nominatim();
+            geocoder2.reverse(e.latlng, map.options.crs.scale(map.getZoom()), (results) => {
+              const result = results[0];
+              if (result) {
+                const address = result.name;
+                const popupContent = `
+                        <form id="restaurant-form">
+                            <label for="restaurant-name">Nom du restaurant:</label>
+                            <input type="text" id="restaurant-name" name="restaurant-name" required>
+                            <button type="submit">Ajouter</button>
+                        </form>
+                    `;
+                const popup = import_leaflet18.default.popup().setLatLng(e.latlng).setContent(popupContent).openOn(map);
+                document.getElementById("restaurant-form").addEventListener("submit", function(event) {
+                  return __async(this, null, function* () {
+                    event.preventDefault();
+                    const restaurantName = document.getElementById("restaurant-name").value;
+                    const restaurant = {
+                      Nom: restaurantName,
+                      Adresse: address,
+                      Latitude: lat,
+                      Longitude: lng
+                    };
+                    try {
+                      const response = yield fetchApi("/ajouterRestaurant", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(restaurant)
+                      });
+                      createRestaurantMarker(restaurant, map);
+                      popup.remove();
+                      console.log("Restaurant ajout\xE9 avec succ\xE8s:", result);
+                    } catch (error) {
+                      console.error("Erreur:", error);
+                    }
+                  });
+                });
+              } else {
+                alert("Adresse non trouv\xE9e");
+              }
+            });
+          });
+        });
+      };
     }
   });
 
