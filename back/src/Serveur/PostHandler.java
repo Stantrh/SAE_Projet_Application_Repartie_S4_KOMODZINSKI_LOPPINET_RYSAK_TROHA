@@ -10,6 +10,7 @@ import java.io.StringReader;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import java.nio.charset.StandardCharsets;
 
 public class PostHandler implements HttpHandler {
     private final ServiceBDD serviceBDD;
@@ -63,9 +64,11 @@ public class PostHandler implements HttpHandler {
                     return;
                 }
 
-                String responseOk="Reservation reussie";
+                String responseOk="Réservation réussie";
+                // Il faut standardiser car les accents ont une longueur d'octets. L'utf8 prend en charge les accents
+                byte[] responseBytes = responseOk.getBytes(StandardCharsets.UTF_8);
+                exchange.sendResponseHeaders(200, responseBytes.length);
 
-                exchange.sendResponseHeaders(200, responseOk.length());
                 try (OutputStream os = exchange.getResponseBody()) {                    
                     os.write(responseOk.getBytes());
                 }
