@@ -9,7 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ServiceRestaurant extends UnicastRemoteObject implements ServiceRMI {
+public class ServiceRestaurant extends UnicastRemoteObject implements ServiceBDD {
 
     private Connection connexion;
 

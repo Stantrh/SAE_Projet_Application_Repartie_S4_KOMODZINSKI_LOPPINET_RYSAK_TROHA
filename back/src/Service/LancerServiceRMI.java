@@ -14,7 +14,7 @@ public class LancerServiceRMI {
                 ServiceRestaurant service = new ServiceRestaurant(args[0], args[1]);
                 System.out.println(service.getAllRestaurant());
                 
-                ServiceRMI rd1 = (ServiceRMI) service;
+                ServiceBDD rd1 = (ServiceBDD) service;
                 reg.rebind("DistributeurRMI", rd1);
                 System.out.println("Le serveur est lancé!");
             } catch (RemoteException e) {

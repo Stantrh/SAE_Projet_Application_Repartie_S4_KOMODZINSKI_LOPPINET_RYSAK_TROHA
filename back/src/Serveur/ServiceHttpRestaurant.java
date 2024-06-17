@@ -2,20 +2,23 @@ package Serveur;
 
 
 import com.sun.net.httpserver.HttpServer;
-import Service.ServiceRMI;
+
+import Service.ServiceBDD;
+import Service.ServiceBDD;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.security.Provider.Service;
 
 public class ServiceHttpRestaurant {
-    private ServiceRMI serviceRMI;
+    private ServiceBDD serviceBDD;
     private HttpServer server;
 
-    public ServiceHttpRestaurant(ServiceRMI serviceRMI)throws IOException {
+    public ServiceHttpRestaurant(ServiceBDD serviceBDD)throws IOException {
         //ServiceHttpRestaurant.serviceRMI = serviceRMI;
-        this.serviceRMI = serviceRMI;
+        this.serviceBDD = serviceBDD;
         server = HttpServer.create(new InetSocketAddress(8080),0);
-        server.createContext("/restaurants", new RestaurantHandler(serviceRMI));
-        server.createContext("/reserverTable", new PostHandler(serviceRMI));
+        server.createContext("/restaurants", new RestaurantHandler(serviceBDD));
+        server.createContext("/reserverTable", new PostHandler(serviceBDD));
 
     }
     public void lancerServer(){

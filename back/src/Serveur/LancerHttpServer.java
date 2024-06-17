@@ -6,7 +6,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import Service.ServiceRMI;
+import Service.ServiceBDD;
 public class LancerHttpServer {
     public static void main(String[] args) {
         int port =0;
@@ -16,9 +16,9 @@ public class LancerHttpServer {
         try {
             Registry reg = LocateRegistry.getRegistry(args[0],port);
             try {
-                ServiceRMI serviceRMI = (ServiceRMI)reg.lookup("DistributeurRMI");
+                ServiceBDD serviceBDD = (ServiceBDD)reg.lookup("DistributeurRMI");
                 try{
-                    ServiceHttpRestaurant service = new ServiceHttpRestaurant(serviceRMI);
+                    ServiceHttpRestaurant service = new ServiceHttpRestaurant(serviceBDD);
                     service.lancerServer();
                 }catch (IOException e){
                     System.out.println("Erreur lors du lancement du Serveur");

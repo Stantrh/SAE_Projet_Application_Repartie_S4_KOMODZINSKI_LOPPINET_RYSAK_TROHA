@@ -5,7 +5,7 @@ package Service;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-public interface ServiceRMI extends Remote {
+public interface ServiceBDD extends Remote {
 
     public String getAllRestaurant() throws RemoteException;
     public String reserverTable(String nom, String prenom, int nbPersonne, String tel, int idRestaurant) throws RemoteException;

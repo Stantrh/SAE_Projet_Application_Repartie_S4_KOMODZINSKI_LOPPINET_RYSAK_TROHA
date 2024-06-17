@@ -2,7 +2,7 @@ package Serveur;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import Service.ServiceRMI;
+import Service.ServiceBDD;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,11 +12,11 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 public class PostHandler implements HttpHandler {
-    private final ServiceRMI serviceRMI;
+    private final ServiceBDD serviceBDD;
 
-    public PostHandler(ServiceRMI service) {
+    public PostHandler(ServiceBDD service) {
         super();
-        this.serviceRMI = service;
+        this.serviceBDD = service;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class PostHandler implements HttpHandler {
                     return;
                 }
 
-                String response = serviceRMI.reserverTable(nom, prenom, nbPersonne, tel, idRestaurant);
+                String response = serviceBDD.reserverTable(nom, prenom, nbPersonne, tel, idRestaurant);
                 if (response.isEmpty()) {
                     exchange.sendResponseHeaders(400, 0);
                     String responseString = "Votre réservation n'a pas pu être effectuée";

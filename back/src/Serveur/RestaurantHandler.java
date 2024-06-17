@@ -4,22 +4,23 @@ package Serveur;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import Service.ServiceRMI;
+import Service.ServiceBDD;
+import Service.ServiceBDD;
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class RestaurantHandler implements HttpHandler {
-    private final ServiceRMI serviceRMI;
+    private final ServiceBDD serviceBDD;
 
-    public RestaurantHandler(ServiceRMI service){
+    public RestaurantHandler(ServiceBDD service){
         super();
-        this.serviceRMI = service;
+        this.serviceBDD = service;
     }
     @Override
     public void handle(HttpExchange exchange) throws IOException {
             if("GET".equals(exchange.getRequestMethod())){
             try{
-                String restaurants = this.serviceRMI.getAllRestaurant();
+                String restaurants = this.serviceBDD.getAllRestaurant();
                 exchange.sendResponseHeaders(200, restaurants.length());
                 OutputStream os = exchange.getResponseBody();
                 os.write(restaurants.getBytes());
