@@ -62,7 +62,7 @@ public class PostHandler implements HttpHandler {
                 }
             } catch (NullPointerException e) {
                 exchange.sendResponseHeaders(400, 0);
-                String response = "Les attributs nom, prenom, nbPersonne et tel sont obligatoires.";
+                String response = "Les attributs nom, prenom, nbPersonne, idRestaurant et tel sont obligatoires.";
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(response.getBytes());
                 }
