@@ -6,6 +6,7 @@
  * Permet de
  * @param apis
  */
-export function fetchApi(apis){
-
+export async function fetchApi(api){
+    console.log("fetch api")
+    return await fetch(api);
 }
