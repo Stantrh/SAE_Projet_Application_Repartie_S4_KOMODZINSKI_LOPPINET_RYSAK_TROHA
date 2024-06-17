@@ -1,11 +1,10 @@
 package Serveur;
 
-import Service.ServiceRMI;
-import com.sun.net.httpserver.HttpServer;
 
+import com.sun.net.httpserver.HttpServer;
+import Service.ServiceRMI;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.rmi.RemoteException;
 
 public class ServiceHttpRestaurant {
     private ServiceRMI serviceRMI;

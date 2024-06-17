@@ -1,9 +1,9 @@
 package Serveur;
 
-import Service.ServiceRMI;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
+import Service.ServiceRMI;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -69,7 +69,7 @@ public class PostHandler implements HttpHandler {
             }
             catch (Exception e){
                 exchange.sendResponseHeaders(400, 0);
-                String response = "La requête n'a pas pu être mené à bien";
+                String response = "La requête n'a pas pu être mené à bien "+e.getMessage();
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();

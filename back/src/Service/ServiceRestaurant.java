@@ -3,12 +3,13 @@ package Service;
 import javax.json.*;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ServiceRestaurant implements ServiceRMI{
+public class ServiceRestaurant extends UnicastRemoteObject implements ServiceRMI {
 
     private Connection connexion;
 
@@ -61,19 +62,9 @@ public class ServiceRestaurant implements ServiceRMI{
         } catch (SQLException e) {
             System.out.println("Problème avec une requête SQL");
             throw new RemoteException("Erreur SQL", e);
-        } finally {
-            // Fermeture de la connexion à la base de données
-            if (connexion != null) {
-                try {
-                    connexion.close();
-                } catch (SQLException e) {
-                    System.out.println("Erreur lors de la fermeture de la connexion");
-                }
-            }
-        }
+        } 
 
     }
-
 
     @Override
     public String reserverTable(String nom, String prenom, int nbPersonne, String tel, int idRestaurant) throws RemoteException {
@@ -116,16 +107,6 @@ public class ServiceRestaurant implements ServiceRMI{
             }
             System.out.println("Problème avec une requête SQL");
             throw new RemoteException("Erreur SQL", e);
-        } finally {
-            if (connexion != null) {
-                try {
-                    connexion.setAutoCommit(true); // Réactiver l'auto-commit
-                    connexion.close(); // Fermer la connexion
-                } catch (SQLException e) {
-                    System.out.println("Erreur lors de la fermeture de la connexion");
-                }
-            }
-        }
+        } 
     }
-
 }
