@@ -23,8 +23,17 @@ public class PostHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         if ("POST".equals(exchange.getRequestMethod())) {
             InputStream requestBody = exchange.getRequestBody();
+            System.out.println(requestBody);
             String body = new String(requestBody.readAllBytes());
-
+            System.out.println(body);
+            if(body.isEmpty()){
+                exchange.sendResponseHeaders(400, 0);
+                String response = "Body required";
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+                return;
+            }
             JsonReader jsonReader = Json.createReader(new StringReader(body));
             JsonObject jsonObject = jsonReader.readObject();
 
