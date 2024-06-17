@@ -1,9 +1,10 @@
-import {stationInfoUrl, stationStatusUrl} from "./config";
+import {API_SERVEUR_URL, stationInfoUrl, stationStatusUrl} from "./config";
 import {fetchApi} from "./dataloader";
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet.heat';
 import 'leaflet-control-geocoder';
+import {get} from "leaflet/src/dom/DomUtil";
 
 async function fetchData(url) {
     const response = await fetchApi(url);
@@ -96,15 +97,15 @@ function createRestaurantMarker(restaurant, map) {
             };
 
             try {
-                const response = await fetchApi('/reserverTable', {
+                const response = await fetchApi(`${API_SERVEUR_URL}/reserverTable`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(data)
                 });
-                const result = await response.json();
-                alert('Réservation réussie!');
+                const result = await response.text();
+                alert(result);
             } catch (error) {
                 console.error('Erreur:', error);
                 alert('Erreur lors de la réservation. Veuillez réessayer.');
@@ -145,7 +146,6 @@ const ajouterEvenementAjoutRestaurant = (map) => {
 
                     const restaurantName = document.getElementById('restaurant-name').value;
 
-                    // TODO Verifier envoie AU SERVEUR A LA ROUTE /ajouterRestaurant
                     const restaurant = {
                         Nom: restaurantName,
                         Adresse: address,
@@ -154,19 +154,15 @@ const ajouterEvenementAjoutRestaurant = (map) => {
                     };
 
                     try {
-                        const response = await fetchApi('/ajouterRestaurant', {
+                        const response = await fetchApi(`${API_SERVEUR_URL}/ajouterRestaurant`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify(restaurant)
                         });
-                        // TODO A remettre lorsque l'api marche à l'endpoint /ajouterRestaurant (post)
-                        // if (!response.ok) {
-                        //     throw new Error('Erreur lors de l\'ajout du restaurant');
-                        // }
-                        //
-                        // const result = await response.json();
+
+                        const result = await response.json();
 
                         createRestaurantMarker(restaurant, map);
 
@@ -184,6 +180,29 @@ const ajouterEvenementAjoutRestaurant = (map) => {
         });
     });
 }
+
+async function getRestaurants() {
+    try {
+        const response = await fetch(`${API_SERVEUR_URL}/restaurants`);
+        const restaurantsReceived = await response.json();
+        return restaurantsReceived;
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+async function getIncidents() {
+    try {
+        const response = await fetch(`${API_SERVEUR_URL}/incidents`);
+        const incidentsReceived = await response.json();
+        return incidentsReceived.incidents;
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+
+getRestaurants();
 
 export async function initMap() {
     try {
@@ -204,16 +223,7 @@ export async function initMap() {
             }
         });
 
-        // TODO A changer par le retour api à l'endpoint /restaurants (get)
-        const restaurantsReceived = [
-            {"RestaurantID":1,"Nom":"Tanto Bene","Adresse":"1 Av. Foch, 54000 Nancy","Latitude":48.6895,"Longitude":6.177},
-            {"RestaurantID":2,"Nom":"foodies burger","Adresse":"4 Rue des Tiercelins, 54000 Nancy","Latitude":48.6896,"Longitude":6.1852},
-            {"RestaurantID":3,"Nom":"Khan Restaurant","Adresse":"58 Rue des Ponts, 54000 Nancy","Latitude":48.6871,"Longitude":6.1827},
-            {"RestaurantID":4,"Nom":"Koboon","Adresse":"34 Av. du XX Corps, 54000 Nancy","Latitude":48.6938,"Longitude":6.1911},
-            {"RestaurantID":5,"Nom":"Zeugma","Adresse":"32-34 Rue des Sœurs Macarons, 54000 Nancy","Latitude":48.6891,"Longitude":6.1848},
-            {"RestaurantID":6,"Nom":"Côté Sushi","Adresse":"18 Pl. Henri Mengin, 54000 Nancy","Latitude":48.6903,"Longitude":6.1819},
-            {"RestaurantID":7,"Nom":"Chicken Street","Adresse":"16 Av. du Général Leclerc, 54000 Nancy","Latitude":48.6851,"Longitude":6.186}
-        ];
+        const restaurantsReceived= await getRestaurants();
 
         restaurantsReceived.forEach(restaurant => {
             createRestaurantMarker(restaurant, map);
@@ -221,47 +231,7 @@ export async function initMap() {
 
         ajouterEvenementAjoutRestaurant(map);
 
-        // TODO A changer par le retour api à l'endpoint /incidents (get)
-        const incidentsReceived = [
-            {
-                "type": "CONSTRUCTION",
-                "description": "Chauffage urbain - Voirie: R�duction � une file de circulation, R�tr�cissement des voies",
-                "short_description": "Chauffage urbain - Voirie",
-                "starttime": "2024-06-01T00:00:00",
-                "endtime": "2024-08-30T00:00:00",
-                "location": {
-                    "street": "Boulevard Louis Barthou",
-                    "polyline": "48.670705110635964 6.186903512600356",
-                    "location_description": "BOULEVARD LOUIS BARTHOU, VANDOEUVRE"
-                },
-                "source": {
-                    "name": "M�tropole du Grand Nancy",
-                    "reference": "Grand_Nancy"
-                },
-                "updatetime": "2024-03-21T20:29:37.251429",
-                "creationtime": "2024-03-21T20:29:37.251421",
-                "id": "FrMdGN54180828"
-            },
-            {
-                "type": "CONSTRUCTION",
-                "description": "Chantier ponctuel - Voirie: D�viation pour les pi�tons (pas de passage interdit), Suppression d'un sens de circulation (Rue en sens unique)",
-                "short_description": "Chantier ponctuel - Voirie",
-                "starttime": "2023-06-28T00:00:00",
-                "endtime": "2024-06-28T00:00:00",
-                "location": {
-                    "street": "Rue Saint-Jean",
-                    "polyline": "48.69070423748256 6.182203192232047",
-                    "location_description": "RUE SEMARD ST JEAN ST GEORGES, NANCY"
-                },
-                "source": {
-                    "name": "M�tropole du Grand Nancy",
-                    "reference": "Grand_Nancy"
-                },
-                "updatetime": "2024-03-21T20:29:37.322720",
-                "creationtime": "2024-03-21T20:29:37.322712",
-                "id": "FrMdGN54171862"
-            },
-        ];
+        const incidentsReceived = await getIncidents();
 
         incidentsReceived.forEach(incident => {
             createIncident(incident, map);

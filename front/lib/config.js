@@ -6,3 +6,4 @@ export const stationStatusUrl = "https://transport.data.gouv.fr/gbfs/nancy/stati
 // API du service central pour MIAAM BDD
 export const MIAAM_URL = "http://10.11.88.211:8080/reserverTable";
 
+export const API_SERVEUR_URL = "http://localhost:8080";
