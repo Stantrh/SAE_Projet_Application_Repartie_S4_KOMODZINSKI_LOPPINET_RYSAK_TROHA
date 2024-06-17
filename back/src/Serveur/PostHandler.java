@@ -51,6 +51,7 @@ public class PostHandler implements HttpHandler {
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
+                return;
             }catch (NullPointerException e){
                 System.out.println("Heho");
                 exchange.sendResponseHeaders(400, 0);
