@@ -11648,6 +11648,69 @@
                 `);
           }
         });
+        const restaurantsReceived = [
+          { "RestaurantID": 1, "Nom": "Tanto Bene", "Adresse": "1 Av. Foch, 54000 Nancy", "Latitude": 48.6895, "Longitude": 6.177 },
+          { "RestaurantID": 2, "Nom": "foodies burger", "Adresse": "4 Rue des Tiercelins, 54000 Nancy", "Latitude": 48.6896, "Longitude": 6.1852 },
+          { "RestaurantID": 3, "Nom": "Khan Restaurant", "Adresse": "58 Rue des Ponts, 54000 Nancy", "Latitude": 48.6871, "Longitude": 6.1827 },
+          { "RestaurantID": 4, "Nom": "Koboon", "Adresse": "34 Av. du XX Corps, 54000 Nancy", "Latitude": 48.6938, "Longitude": 6.1911 },
+          { "RestaurantID": 5, "Nom": "Zeugma", "Adresse": "32-34 Rue des S\uFFFDurs Macarons, 54000 Nancy", "Latitude": 48.6891, "Longitude": 6.1848 },
+          { "RestaurantID": 6, "Nom": "C\uFFFDt\uFFFD Sushi", "Adresse": "18 Pl. Henri Mengin, 54000 Nancy", "Latitude": 48.6903, "Longitude": 6.1819 },
+          { "RestaurantID": 7, "Nom": "Chicken Street", "Adresse": "16 Av. du G\uFFFDn\uFFFDral Leclerc, 54000 Nancy", "Latitude": 48.6851, "Longitude": 6.186 }
+        ];
+        restaurantsReceived.forEach((restaurant) => {
+          const marker = import_leaflet.default.marker([restaurant.Latitude, restaurant.Longitude], {
+            icon: import_leaflet.default.icon({
+              iconUrl: "../resources/icon-restaurant.png",
+              iconSize: [41, 41],
+              iconAnchor: [12, 41],
+              popupAnchor: [1, -34],
+              shadowSize: [41, 41]
+            })
+          }).addTo(map);
+          const popupContent = `
+                <b>${restaurant.Nom}</b><br>
+                Adresse: ${restaurant.Adresse}<br><br>
+                <form id="reservation-form-${restaurant.RestaurantID}">
+                    <label for="nom">Nom:</label><br>
+                    <input type="text" id="nom" name="nom"><br>
+                    <label for="prenom">Pr\xE9nom:</label><br>
+                    <input type="text" id="prenom" name="prenom"><br>
+                    <label for="nbPersonne">Nombre de personnes:</label><br>
+                    <input type="number" id="nbPersonne" name="nbPersonne"><br>
+                    <label for="tel">T\xE9l\xE9phone:</label><br>
+                    <input type="text" id="tel" name="tel"><br><br>
+                    <input type="hidden" id="idRestaurant" name="idRestaurant" value="${restaurant.RestaurantID}">
+                    <input type="submit" value="R\xE9server">
+                </form>
+            `;
+          marker.bindPopup(popupContent);
+          marker.on("popupopen", function() {
+            const form = document.getElementById(`reservation-form-${restaurant.RestaurantID}`);
+            form.addEventListener("submit", function(event) {
+              event.preventDefault();
+              const formData = new FormData(form);
+              const data = {
+                nom: formData.get("nom"),
+                prenom: formData.get("prenom"),
+                nbPersonne: parseInt(formData.get("nbPersonne")),
+                tel: formData.get("tel"),
+                idRestaurant: parseInt(formData.get("idRestaurant"))
+              };
+              fetch("/reserverTable", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+              }).then((response) => response.json()).then((result) => {
+                alert("R\xE9servation r\xE9ussie!");
+              }).catch((error) => {
+                console.error("Erreur:", error);
+                alert("Erreur lors de la r\xE9servation. Veuillez r\xE9essayer.");
+              });
+            });
+          });
+        });
       } catch (error) {
         console.error("Erreur lors de la r\xE9cup\xE9ration des donn\xE9es :", error);
       }
