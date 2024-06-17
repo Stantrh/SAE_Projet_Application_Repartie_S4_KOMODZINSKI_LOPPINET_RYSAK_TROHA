@@ -37,14 +37,14 @@ public class PostAddRestaurant implements HttpHandler {
             JsonObject jsonObject = jsonReader.readObject();
 
             try {
-                String nom = jsonObject.getString("nom");
-                String adresse = jsonObject.getString("adresse");
-                Double latitude = jsonObject.getJsonNumber("latitude").doubleValue();
-                Double longitude = jsonObject.getJsonNumber("longitude").doubleValue();
+                String nom = jsonObject.getString("Nom");
+                String adresse = jsonObject.getString("Adresse");
+                Double latitude = jsonObject.getJsonNumber("Latitude").doubleValue();
+                Double longitude = jsonObject.getJsonNumber("Longitude").doubleValue();
 
                 if (nom.isEmpty() || adresse.isEmpty()) {
                     exchange.sendResponseHeaders(400, 0);
-                    String response = "Les attributs nom, adresse lagitude et longitude sont obligatoires.";
+                    String response = "Les attributs Nom, Adresse, Latitude et Longitude sont obligatoires.";
                     try (OutputStream os = exchange.getResponseBody()) {
                         os.write(response.getBytes());
                     }
