@@ -3,12 +3,13 @@ package Service;
 import javax.json.*;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ServiceRestaurant implements ServiceRMI{
+public class ServiceRestaurant extends UnicastRemoteObject implements ServiceRMI {
 
     private Connection connexion;
 
@@ -65,7 +66,6 @@ public class ServiceRestaurant implements ServiceRMI{
 
     }
 
-
     @Override
     public String reserverTable(String nom, String prenom, int nbPersonne, String tel, int idRestaurant) throws RemoteException {
         try {
@@ -93,7 +93,7 @@ public class ServiceRestaurant implements ServiceRMI{
             } else {
                 // Annuler la transaction si l'insertion a échoué
                 connexion.rollback();
-                return "Échec de la réservation";
+                return "";
             }
 
         } catch (SQLException e) {
@@ -109,5 +109,4 @@ public class ServiceRestaurant implements ServiceRMI{
             throw new RemoteException("Erreur SQL", e);
         }
     }
-
 }
