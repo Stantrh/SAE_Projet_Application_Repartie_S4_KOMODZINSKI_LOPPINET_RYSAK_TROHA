@@ -11619,14 +11619,24 @@
     }
   });
 
+  // lib/dataloader.js
+  function fetchApi(api) {
+    return __async(this, null, function* () {
+      console.log("fetch api");
+      return yield fetch(api);
+    });
+  }
+  var init_dataloader = __esm({
+    "lib/dataloader.js"() {
+    }
+  });
+
   // lib/map_ui.js
   function initMap() {
     return __async(this, null, function* () {
       try {
-        const [stationInfoResponse, stationStatusResponse] = yield Promise.all([
-          fetch(stationInfoUrl),
-          fetch(stationStatusUrl)
-        ]);
+        const stationInfoResponse = yield fetchApi(stationInfoUrl);
+        const stationStatusResponse = yield fetchApi(stationStatusUrl);
         const stationInfoData = yield stationInfoResponse.json();
         const stationStatusData = yield stationStatusResponse.json();
         const stationInfo = stationInfoData.data.stations;
@@ -11660,6 +11670,7 @@
       import_leaflet = __toESM(require_leaflet_src());
       import_leaflet2 = __toESM(require_leaflet_markercluster_src());
       init_leaflet_heat();
+      init_dataloader();
     }
   });
 
@@ -11667,9 +11678,11 @@
   var require_front = __commonJS({
     "index.js"(exports) {
       init_map_ui();
-      init_config();
+      init_dataloader();
       document.addEventListener("DOMContentLoaded", () => __async(exports, null, function* () {
         yield initMap();
+        console.log("FETCH DE l'API DONNEES BLOQUEES");
+        const rep = yield fetchApi("https://www.datagrandest.fr/data4citizen/d4c/api/datasets/1.0/1642070072496-1/alternative_exports/90c43af4-e5b9-4069-8bf1-61a5b900b476/");
       }));
     }
   });

@@ -2,6 +2,7 @@ import {stationInfoUrl, stationStatusUrl} from "./config";
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet.heat';
+import {fetchApi} from "./dataloader";
 
 
 /**
@@ -10,14 +11,11 @@ import 'leaflet.heat';
  */
 export async function initMap() {
     try {
-        // On récupère d'abord les infos auprès des 2 urls avec promise all
-        // comme ça, les 2 promesses sont obligées d'être un succès
-        const [stationInfoResponse, stationStatusResponse] = await Promise.all([
-            fetch(stationInfoUrl),
-            fetch(stationStatusUrl)
-        ]);
 
-        // Puis on convertir les données en json
+        const stationInfoResponse = await fetchApi(stationInfoUrl);
+        const stationStatusResponse = await fetchApi(stationStatusUrl);
+
+      // Puis on convertir les données en json
         const stationInfoData = await stationInfoResponse.json();
         const stationStatusData = await stationStatusResponse.json();
 
