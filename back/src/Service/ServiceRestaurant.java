@@ -61,15 +61,6 @@ public class ServiceRestaurant implements ServiceRMI{
         } catch (SQLException e) {
             System.out.println("Problème avec une requête SQL");
             throw new RemoteException("Erreur SQL", e);
-        } finally {
-            // Fermeture de la connexion à la base de données
-            if (connexion != null) {
-                try {
-                    connexion.close();
-                } catch (SQLException e) {
-                    System.out.println("Erreur lors de la fermeture de la connexion");
-                }
-            }
         }
 
     }
@@ -116,15 +107,6 @@ public class ServiceRestaurant implements ServiceRMI{
             }
             System.out.println("Problème avec une requête SQL");
             throw new RemoteException("Erreur SQL", e);
-        } finally {
-            if (connexion != null) {
-                try {
-                    connexion.setAutoCommit(true); // Réactiver l'auto-commit
-                    connexion.close(); // Fermer la connexion
-                } catch (SQLException e) {
-                    System.out.println("Erreur lors de la fermeture de la connexion");
-                }
-            }
         }
     }
 
