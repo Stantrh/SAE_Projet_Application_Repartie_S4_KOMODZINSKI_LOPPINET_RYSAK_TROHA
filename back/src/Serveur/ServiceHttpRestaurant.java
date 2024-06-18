@@ -29,6 +29,7 @@ public class ServiceHttpRestaurant {
         server.setExecutor(null);
         server.start();
         System.out.println("Serveur démarré sur le port 8080");
+        System.out.println("Listening on: " + server.getAddress());
     }
 
 
