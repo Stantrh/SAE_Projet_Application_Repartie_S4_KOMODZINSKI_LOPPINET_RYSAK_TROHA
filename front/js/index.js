@@ -53,23 +53,41 @@
   };
 
   // lib/config.js
-  var stationInfoUrl, stationStatusUrl, API_SERVEUR_URL;
+  var stationInfoUrl, stationStatusUrl, INCIDENTS_URL, API_SERVEUR_URL, API_ETABLISSEMENTS_SUPERIEURS, meteoUrl;
   var init_config = __esm({
     "lib/config.js"() {
       stationInfoUrl = "https://transport.data.gouv.fr/gbfs/nancy/station_information.json";
       stationStatusUrl = "https://transport.data.gouv.fr/gbfs/nancy/station_status.json";
+      INCIDENTS_URL = "https://www.datagrandest.fr/data4citizen/d4c/api/datasets/1.0/1642070072496-1/alternative_exports/90c43af4-e5b9-4069-8bf1-61a5b900b476";
       API_SERVEUR_URL = "http://localhost:8080";
+      API_ETABLISSEMENTS_SUPERIEURS = "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-implantations_etablissements_d_enseignement_superieur_publics/records?limit=50&refine=localisation%3A%22Alsace%20-%20Champagne-Ardenne%20-%20Lorraine%3ENancy-Metz%3EMeurthe-et-Moselle%3ENancy%22";
+      meteoUrl = "https://www.infoclimat.fr/public-api/gfs/json?_ll=48.67103,6.15083&_auth=ARsDFFIsBCZRfFtsD3lSe1Q8ADUPeVRzBHgFZgtuAH1UMQNgUTNcPlU5VClSfVZkUn8AYVxmVW0Eb1I2WylSLgFgA25SNwRuUT1bPw83UnlUeAB9DzFUcwR4BWMLYwBhVCkDb1EzXCBVOFQoUmNWZlJnAH9cfFVsBGRSPVs1UjEBZwNkUjIEYVE6WyYPIFJjVGUAZg9mVD4EbwVhCzMAMFQzA2JRMlw5VThUKFJiVmtSZQBpXGtVbwRlUjVbKVIuARsDFFIsBCZRfFtsD3lSe1QyAD4PZA%3D%3D&_c=19f3aa7d766b6ba91191c8be71dd1ab2";
     }
   });
 
   // lib/dataloader.js
-  function fetchApi(api, options) {
-    return __async(this, null, function* () {
-      return yield fetch(api, options);
+  function fetchWithProxy(_0) {
+    return __async(this, arguments, function* (url, options = {}) {
+      try {
+        const response = yield fetch(url, options);
+        if (!response.ok)
+          throw new Error("CORS issue");
+        const data = yield response.json();
+        return data;
+      } catch (error) {
+        const proxyUrl = `${API_SERVEUR_URL}/proxy?url=${encodeURIComponent(url)}`;
+        const proxyResponse = yield fetch(proxyUrl, options);
+        if (!proxyResponse.ok) {
+          throw new Error("Erreur avec proxy");
+        }
+        const proxyData = yield proxyResponse.json();
+        return proxyData;
+      }
     });
   }
   var init_dataloader = __esm({
     "lib/dataloader.js"() {
+      init_config();
     }
   });
 
@@ -109,10 +127,10 @@
             return fn.apply(obj, args.length ? args.concat(slice.call(arguments)) : arguments);
           };
         }
-        var lastId2 = 0;
-        function stamp2(obj) {
+        var lastId = 0;
+        function stamp(obj) {
           if (!("_leaflet_id" in obj)) {
-            obj["_leaflet_id"] = ++lastId2;
+            obj["_leaflet_id"] = ++lastId;
           }
           return obj._leaflet_id;
         }
@@ -140,21 +158,21 @@
           var max = range[1], min = range[0], d = max - min;
           return x === max && includeMax ? x : ((x - min) % d + d) % d + min;
         }
-        function falseFn2() {
+        function falseFn() {
           return false;
         }
-        function formatNum2(num, precision) {
+        function formatNum(num, precision) {
           if (precision === false) {
             return num;
           }
           var pow = Math.pow(10, precision === void 0 ? 6 : precision);
           return Math.round(num * pow) / pow;
         }
-        function trim2(str) {
+        function trim(str) {
           return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, "");
         }
-        function splitWords2(str) {
-          return trim2(str).split(/\s+/);
+        function splitWords(str) {
+          return trim(str).split(/\s+/);
         }
         function setOptions(obj, options) {
           if (!Object.prototype.hasOwnProperty.call(obj, "options")) {
@@ -184,10 +202,10 @@
             return value;
           });
         }
-        var isArray2 = Array.isArray || function(obj) {
+        var isArray = Array.isArray || function(obj) {
           return Object.prototype.toString.call(obj) === "[object Array]";
         };
-        function indexOf2(array, el) {
+        function indexOf(array, el) {
           for (var i = 0; i < array.length; i++) {
             if (array[i] === el) {
               return i;
@@ -196,29 +214,29 @@
           return -1;
         }
         var emptyImageUrl = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-        function getPrefixed2(name) {
+        function getPrefixed(name) {
           return window["webkit" + name] || window["moz" + name] || window["ms" + name];
         }
-        var lastTime2 = 0;
-        function timeoutDefer2(fn) {
-          var time = +/* @__PURE__ */ new Date(), timeToCall = Math.max(0, 16 - (time - lastTime2));
-          lastTime2 = time + timeToCall;
+        var lastTime = 0;
+        function timeoutDefer(fn) {
+          var time = +/* @__PURE__ */ new Date(), timeToCall = Math.max(0, 16 - (time - lastTime));
+          lastTime = time + timeToCall;
           return window.setTimeout(fn, timeToCall);
         }
-        var requestFn2 = window.requestAnimationFrame || getPrefixed2("RequestAnimationFrame") || timeoutDefer2;
-        var cancelFn2 = window.cancelAnimationFrame || getPrefixed2("CancelAnimationFrame") || getPrefixed2("CancelRequestAnimationFrame") || function(id) {
+        var requestFn = window.requestAnimationFrame || getPrefixed("RequestAnimationFrame") || timeoutDefer;
+        var cancelFn = window.cancelAnimationFrame || getPrefixed("CancelAnimationFrame") || getPrefixed("CancelRequestAnimationFrame") || function(id) {
           window.clearTimeout(id);
         };
         function requestAnimFrame(fn, context, immediate) {
-          if (immediate && requestFn2 === timeoutDefer2) {
+          if (immediate && requestFn === timeoutDefer) {
             fn.call(context);
           } else {
-            return requestFn2.call(window, bind(fn, context));
+            return requestFn.call(window, bind(fn, context));
           }
         }
         function cancelAnimFrame(id) {
           if (id) {
-            cancelFn2.call(window, id);
+            cancelFn.call(window, id);
           }
         }
         var Util = {
@@ -227,23 +245,23 @@
           create: create$2,
           bind,
           get lastId() {
-            return lastId2;
+            return lastId;
           },
-          stamp: stamp2,
+          stamp,
           throttle,
           wrapNum,
-          falseFn: falseFn2,
-          formatNum: formatNum2,
-          trim: trim2,
-          splitWords: splitWords2,
+          falseFn,
+          formatNum,
+          trim,
+          splitWords,
           setOptions,
           getParamString: getParamString2,
           template: template2,
-          isArray: isArray2,
-          indexOf: indexOf2,
+          isArray,
+          indexOf,
           emptyImageUrl,
-          requestFn: requestFn2,
-          cancelFn: cancelFn2,
+          requestFn,
+          cancelFn,
           requestAnimFrame,
           cancelAnimFrame
         };
@@ -321,7 +339,7 @@
           if (typeof L === "undefined" || !L || !L.Mixin) {
             return;
           }
-          includes = isArray2(includes) ? includes : [includes];
+          includes = isArray(includes) ? includes : [includes];
           for (var i = 0; i < includes.length; i++) {
             if (includes[i] === L.Mixin.Events) {
               console.warn("Deprecated include of L.Mixin.Events: this property will be removed in future releases, please inherit from L.Evented instead.", new Error().stack);
@@ -342,7 +360,7 @@
                 this._on(type, types[type], fn);
               }
             } else {
-              types = splitWords2(types);
+              types = splitWords(types);
               for (var i = 0, len = types.length; i < len; i++) {
                 this._on(types[i], fn, context);
               }
@@ -368,7 +386,7 @@
                 this._off(type, types[type], fn);
               }
             } else {
-              types = splitWords2(types);
+              types = splitWords(types);
               var removeAll = arguments.length === 1;
               for (var i = 0, len = types.length; i < len; i++) {
                 if (removeAll) {
@@ -412,7 +430,7 @@
             if (arguments.length === 1) {
               if (this._firingCount) {
                 for (i = 0, len = listeners.length; i < len; i++) {
-                  listeners[i].fn = falseFn2;
+                  listeners[i].fn = falseFn;
                 }
               }
               delete this._events[type];
@@ -426,7 +444,7 @@
             if (index2 !== false) {
               var listener = listeners[index2];
               if (this._firingCount) {
-                listener.fn = falseFn2;
+                listener.fn = falseFn;
                 this._events[type] = listeners = listeners.slice();
               }
               listeners.splice(index2, 1);
@@ -521,7 +539,7 @@
                 this._on(type, types[type], fn, true);
               }
             } else {
-              types = splitWords2(types);
+              types = splitWords(types);
               for (var i = 0, len = types.length; i < len; i++) {
                 this._on(types[i], fn, context, true);
               }
@@ -532,14 +550,14 @@
           // Adds an event parent - an `Evented` that will receive propagated events
           addEventParent: function(obj) {
             this._eventParents = this._eventParents || {};
-            this._eventParents[stamp2(obj)] = obj;
+            this._eventParents[stamp(obj)] = obj;
             return this;
           },
           // @method removeEventParent(obj: Evented): this
           // Removes an event parent, so it will stop receiving propagated events
           removeEventParent: function(obj) {
             if (this._eventParents) {
-              delete this._eventParents[stamp2(obj)];
+              delete this._eventParents[stamp(obj)];
             }
             return this;
           },
@@ -558,23 +576,23 @@
         Events.fireEvent = Events.fire;
         Events.hasEventListeners = Events.listens;
         var Evented = Class.extend(Events);
-        function Point2(x, y, round) {
+        function Point(x, y, round) {
           this.x = round ? Math.round(x) : x;
           this.y = round ? Math.round(y) : y;
         }
-        var trunc2 = Math.trunc || function(v) {
+        var trunc = Math.trunc || function(v) {
           return v > 0 ? Math.floor(v) : Math.ceil(v);
         };
-        Point2.prototype = {
+        Point.prototype = {
           // @method clone(): Point
           // Returns a copy of the current point.
           clone: function() {
-            return new Point2(this.x, this.y);
+            return new Point(this.x, this.y);
           },
           // @method add(otherPoint: Point): Point
           // Returns the result of addition of the current and the given points.
           add: function(point) {
-            return this.clone()._add(toPoint2(point));
+            return this.clone()._add(toPoint(point));
           },
           _add: function(point) {
             this.x += point.x;
@@ -584,7 +602,7 @@
           // @method subtract(otherPoint: Point): Point
           // Returns the result of subtraction of the given point from the current.
           subtract: function(point) {
-            return this.clone()._subtract(toPoint2(point));
+            return this.clone()._subtract(toPoint(point));
           },
           _subtract: function(point) {
             this.x -= point.x;
@@ -617,13 +635,13 @@
           // [scaling matrix](https://en.wikipedia.org/wiki/Scaling_%28geometry%29#Matrix_representation)
           // defined by `scale`.
           scaleBy: function(point) {
-            return new Point2(this.x * point.x, this.y * point.y);
+            return new Point(this.x * point.x, this.y * point.y);
           },
           // @method unscaleBy(scale: Point): Point
           // Inverse of `scaleBy`. Divide each coordinate of the current point by
           // each coordinate of `scale`.
           unscaleBy: function(point) {
-            return new Point2(this.x / point.x, this.y / point.y);
+            return new Point(this.x / point.x, this.y / point.y);
           },
           // @method round(): Point
           // Returns a copy of the current point with rounded coordinates.
@@ -661,49 +679,49 @@
             return this.clone()._trunc();
           },
           _trunc: function() {
-            this.x = trunc2(this.x);
-            this.y = trunc2(this.y);
+            this.x = trunc(this.x);
+            this.y = trunc(this.y);
             return this;
           },
           // @method distanceTo(otherPoint: Point): Number
           // Returns the cartesian distance between the current and the given points.
           distanceTo: function(point) {
-            point = toPoint2(point);
+            point = toPoint(point);
             var x = point.x - this.x, y = point.y - this.y;
             return Math.sqrt(x * x + y * y);
           },
           // @method equals(otherPoint: Point): Boolean
           // Returns `true` if the given point has the same coordinates.
           equals: function(point) {
-            point = toPoint2(point);
+            point = toPoint(point);
             return point.x === this.x && point.y === this.y;
           },
           // @method contains(otherPoint: Point): Boolean
           // Returns `true` if both coordinates of the given point are less than the corresponding current point coordinates (in absolute values).
           contains: function(point) {
-            point = toPoint2(point);
+            point = toPoint(point);
             return Math.abs(point.x) <= Math.abs(this.x) && Math.abs(point.y) <= Math.abs(this.y);
           },
           // @method toString(): String
           // Returns a string representation of the point for debugging purposes.
           toString: function() {
-            return "Point(" + formatNum2(this.x) + ", " + formatNum2(this.y) + ")";
+            return "Point(" + formatNum(this.x) + ", " + formatNum(this.y) + ")";
           }
         };
-        function toPoint2(x, y, round) {
-          if (x instanceof Point2) {
+        function toPoint(x, y, round) {
+          if (x instanceof Point) {
             return x;
           }
-          if (isArray2(x)) {
-            return new Point2(x[0], x[1]);
+          if (isArray(x)) {
+            return new Point(x[0], x[1]);
           }
           if (x === void 0 || x === null) {
             return x;
           }
           if (typeof x === "object" && "x" in x && "y" in x) {
-            return new Point2(x.x, x.y);
+            return new Point(x.x, x.y);
           }
-          return new Point2(x, y, round);
+          return new Point(x, y, round);
         }
         function Bounds(a, b) {
           if (!a) {
@@ -725,8 +743,8 @@
             if (!obj) {
               return this;
             }
-            if (obj instanceof Point2 || typeof obj[0] === "number" || "x" in obj) {
-              min2 = max2 = toPoint2(obj);
+            if (obj instanceof Point || typeof obj[0] === "number" || "x" in obj) {
+              min2 = max2 = toPoint(obj);
             } else {
               obj = toBounds(obj);
               min2 = obj.min;
@@ -749,7 +767,7 @@
           // @method getCenter(round?: Boolean): Point
           // Returns the center point of the bounds.
           getCenter: function(round) {
-            return toPoint2(
+            return toPoint(
               (this.min.x + this.max.x) / 2,
               (this.min.y + this.max.y) / 2,
               round
@@ -758,12 +776,12 @@
           // @method getBottomLeft(): Point
           // Returns the bottom-left point of the bounds.
           getBottomLeft: function() {
-            return toPoint2(this.min.x, this.max.y);
+            return toPoint(this.min.x, this.max.y);
           },
           // @method getTopRight(): Point
           // Returns the top-right point of the bounds.
           getTopRight: function() {
-            return toPoint2(this.max.x, this.min.y);
+            return toPoint(this.max.x, this.min.y);
           },
           // @method getTopLeft(): Point
           // Returns the top-left point of the bounds (i.e. [`this.min`](#bounds-min)).
@@ -787,8 +805,8 @@
           // Returns `true` if the rectangle contains the given point.
           contains: function(obj) {
             var min, max;
-            if (typeof obj[0] === "number" || obj instanceof Point2) {
-              obj = toPoint2(obj);
+            if (typeof obj[0] === "number" || obj instanceof Point) {
+              obj = toPoint(obj);
             } else {
               obj = toBounds(obj);
             }
@@ -828,8 +846,8 @@
           pad: function(bufferRatio) {
             var min = this.min, max = this.max, heightBuffer = Math.abs(min.x - max.x) * bufferRatio, widthBuffer = Math.abs(min.y - max.y) * bufferRatio;
             return toBounds(
-              toPoint2(min.x - heightBuffer, min.y - widthBuffer),
-              toPoint2(max.x + heightBuffer, max.y + widthBuffer)
+              toPoint(min.x - heightBuffer, min.y - widthBuffer),
+              toPoint(max.x + heightBuffer, max.y + widthBuffer)
             );
           },
           // @method equals(otherBounds: Bounds): Boolean
@@ -1034,7 +1052,7 @@
           // @method toString(): String
           // Returns a string representation of the point (for debugging purposes).
           toString: function(precision) {
-            return "LatLng(" + formatNum2(this.lat, precision) + ", " + formatNum2(this.lng, precision) + ")";
+            return "LatLng(" + formatNum(this.lat, precision) + ", " + formatNum(this.lng, precision) + ")";
           },
           // @method distanceTo(otherLatLng: LatLng): Number
           // Returns the distance (in meters) to the given `LatLng` calculated using the [Spherical Law of Cosines](https://en.wikipedia.org/wiki/Spherical_law_of_cosines).
@@ -1063,7 +1081,7 @@
           if (a instanceof LatLng2) {
             return a;
           }
-          if (isArray2(a) && typeof a[0] !== "object") {
+          if (isArray(a) && typeof a[0] !== "object") {
             if (a.length === 3) {
               return new LatLng2(a[0], a[1], a[2]);
             }
@@ -1186,7 +1204,7 @@
           MAX_LATITUDE: 85.0511287798,
           project: function(latlng) {
             var d = Math.PI / 180, max = this.MAX_LATITUDE, lat = Math.max(Math.min(max, latlng.lat), -max), sin = Math.sin(lat * d);
-            return new Point2(
+            return new Point(
               this.R * latlng.lng * d,
               this.R * Math.log((1 + sin) / (1 - sin)) / 2
             );
@@ -1204,7 +1222,7 @@
           }()
         };
         function Transformation(a, b, c, d) {
-          if (isArray2(a)) {
+          if (isArray(a)) {
             this._a = a[0];
             this._b = a[1];
             this._c = a[2];
@@ -1235,7 +1253,7 @@
           // by the given scale. Only accepts actual `L.Point` instances, not arrays.
           untransform: function(point, scale2) {
             scale2 = scale2 || 1;
-            return new Point2(
+            return new Point(
               (point.x / scale2 - this._b) / this._a,
               (point.y / scale2 - this._d) / this._c
             );
@@ -1255,7 +1273,7 @@
         var EPSG900913 = extend({}, EPSG3857, {
           code: "EPSG:900913"
         });
-        function svgCreate2(name) {
+        function svgCreate(name) {
           return document.createElementNS("http://www.w3.org/2000/svg", name);
         }
         function pointsToPath(rings, closed) {
@@ -1270,37 +1288,37 @@
           }
           return str || "M0 0";
         }
-        var style2 = document.documentElement.style;
-        var ie2 = "ActiveXObject" in window;
-        var ielt92 = ie2 && !document.addEventListener;
-        var edge2 = "msLaunchUri" in navigator && !("documentMode" in document);
-        var webkit2 = userAgentContains2("webkit");
-        var android2 = userAgentContains2("android");
-        var android232 = userAgentContains2("android 2") || userAgentContains2("android 3");
-        var webkitVer2 = parseInt(/WebKit\/([0-9]+)|$/.exec(navigator.userAgent)[1], 10);
-        var androidStock2 = android2 && userAgentContains2("Google") && webkitVer2 < 537 && !("AudioNode" in window);
-        var opera2 = !!window.opera;
-        var chrome2 = !edge2 && userAgentContains2("chrome");
-        var gecko2 = userAgentContains2("gecko") && !webkit2 && !opera2 && !ie2;
-        var safari2 = !chrome2 && userAgentContains2("safari");
-        var phantom2 = userAgentContains2("phantom");
-        var opera122 = "OTransition" in style2;
-        var win2 = navigator.platform.indexOf("Win") === 0;
-        var ie3d2 = ie2 && "transition" in style2;
-        var webkit3d2 = "WebKitCSSMatrix" in window && "m11" in new window.WebKitCSSMatrix() && !android232;
-        var gecko3d2 = "MozPerspective" in style2;
-        var any3d2 = !window.L_DISABLE_3D && (ie3d2 || webkit3d2 || gecko3d2) && !opera122 && !phantom2;
-        var mobile2 = typeof orientation !== "undefined" || userAgentContains2("mobile");
-        var mobileWebkit2 = mobile2 && webkit2;
-        var mobileWebkit3d2 = mobile2 && webkit3d2;
-        var msPointer2 = !window.PointerEvent && window.MSPointerEvent;
-        var pointer2 = !!(window.PointerEvent || msPointer2);
-        var touchNative2 = "ontouchstart" in window || !!window.TouchEvent;
-        var touch2 = !window.L_NO_TOUCH && (touchNative2 || pointer2);
-        var mobileOpera2 = mobile2 && opera2;
-        var mobileGecko2 = mobile2 && gecko2;
-        var retina2 = (window.devicePixelRatio || window.screen.deviceXDPI / window.screen.logicalXDPI) > 1;
-        var passiveEvents2 = function() {
+        var style = document.documentElement.style;
+        var ie = "ActiveXObject" in window;
+        var ielt9 = ie && !document.addEventListener;
+        var edge = "msLaunchUri" in navigator && !("documentMode" in document);
+        var webkit = userAgentContains("webkit");
+        var android = userAgentContains("android");
+        var android23 = userAgentContains("android 2") || userAgentContains("android 3");
+        var webkitVer = parseInt(/WebKit\/([0-9]+)|$/.exec(navigator.userAgent)[1], 10);
+        var androidStock = android && userAgentContains("Google") && webkitVer < 537 && !("AudioNode" in window);
+        var opera = !!window.opera;
+        var chrome = !edge && userAgentContains("chrome");
+        var gecko = userAgentContains("gecko") && !webkit && !opera && !ie;
+        var safari = !chrome && userAgentContains("safari");
+        var phantom = userAgentContains("phantom");
+        var opera12 = "OTransition" in style;
+        var win = navigator.platform.indexOf("Win") === 0;
+        var ie3d = ie && "transition" in style;
+        var webkit3d = "WebKitCSSMatrix" in window && "m11" in new window.WebKitCSSMatrix() && !android23;
+        var gecko3d = "MozPerspective" in style;
+        var any3d = !window.L_DISABLE_3D && (ie3d || webkit3d || gecko3d) && !opera12 && !phantom;
+        var mobile = typeof orientation !== "undefined" || userAgentContains("mobile");
+        var mobileWebkit = mobile && webkit;
+        var mobileWebkit3d = mobile && webkit3d;
+        var msPointer = !window.PointerEvent && window.MSPointerEvent;
+        var pointer = !!(window.PointerEvent || msPointer);
+        var touchNative = "ontouchstart" in window || !!window.TouchEvent;
+        var touch = !window.L_NO_TOUCH && (touchNative || pointer);
+        var mobileOpera = mobile && opera;
+        var mobileGecko = mobile && gecko;
+        var retina = (window.devicePixelRatio || window.screen.deviceXDPI / window.screen.logicalXDPI) > 1;
+        var passiveEvents = function() {
           var supportsPassiveOption = false;
           try {
             var opts = Object.defineProperty({}, "passive", {
@@ -1308,8 +1326,8 @@
                 supportsPassiveOption = true;
               }
             });
-            window.addEventListener("testPassiveEventSupport", falseFn2, opts);
-            window.removeEventListener("testPassiveEventSupport", falseFn2, opts);
+            window.addEventListener("testPassiveEventSupport", falseFn, opts);
+            window.removeEventListener("testPassiveEventSupport", falseFn, opts);
           } catch (e) {
           }
           return supportsPassiveOption;
@@ -1317,13 +1335,13 @@
         var canvas$1 = function() {
           return !!document.createElement("canvas").getContext;
         }();
-        var svg$1 = !!(document.createElementNS && svgCreate2("svg").createSVGRect);
-        var inlineSvg2 = !!svg$1 && function() {
+        var svg$1 = !!(document.createElementNS && svgCreate("svg").createSVGRect);
+        var inlineSvg = !!svg$1 && function() {
           var div = document.createElement("div");
           div.innerHTML = "<svg/>";
           return (div.firstChild && div.firstChild.namespaceURI) === "http://www.w3.org/2000/svg";
         }();
-        var vml2 = !svg$1 && function() {
+        var vml = !svg$1 && function() {
           try {
             var div = document.createElement("div");
             div.innerHTML = '<v:shape adj="1"/>';
@@ -1334,123 +1352,123 @@
             return false;
           }
         }();
-        var mac2 = navigator.platform.indexOf("Mac") === 0;
-        var linux2 = navigator.platform.indexOf("Linux") === 0;
-        function userAgentContains2(str) {
+        var mac = navigator.platform.indexOf("Mac") === 0;
+        var linux = navigator.platform.indexOf("Linux") === 0;
+        function userAgentContains(str) {
           return navigator.userAgent.toLowerCase().indexOf(str) >= 0;
         }
         var Browser = {
-          ie: ie2,
-          ielt9: ielt92,
-          edge: edge2,
-          webkit: webkit2,
-          android: android2,
-          android23: android232,
-          androidStock: androidStock2,
-          opera: opera2,
-          chrome: chrome2,
-          gecko: gecko2,
-          safari: safari2,
-          phantom: phantom2,
-          opera12: opera122,
-          win: win2,
-          ie3d: ie3d2,
-          webkit3d: webkit3d2,
-          gecko3d: gecko3d2,
-          any3d: any3d2,
-          mobile: mobile2,
-          mobileWebkit: mobileWebkit2,
-          mobileWebkit3d: mobileWebkit3d2,
-          msPointer: msPointer2,
-          pointer: pointer2,
-          touch: touch2,
-          touchNative: touchNative2,
-          mobileOpera: mobileOpera2,
-          mobileGecko: mobileGecko2,
-          retina: retina2,
-          passiveEvents: passiveEvents2,
+          ie,
+          ielt9,
+          edge,
+          webkit,
+          android,
+          android23,
+          androidStock,
+          opera,
+          chrome,
+          gecko,
+          safari,
+          phantom,
+          opera12,
+          win,
+          ie3d,
+          webkit3d,
+          gecko3d,
+          any3d,
+          mobile,
+          mobileWebkit,
+          mobileWebkit3d,
+          msPointer,
+          pointer,
+          touch,
+          touchNative,
+          mobileOpera,
+          mobileGecko,
+          retina,
+          passiveEvents,
           canvas: canvas$1,
           svg: svg$1,
-          vml: vml2,
-          inlineSvg: inlineSvg2,
-          mac: mac2,
-          linux: linux2
+          vml,
+          inlineSvg,
+          mac,
+          linux
         };
-        var POINTER_DOWN2 = Browser.msPointer ? "MSPointerDown" : "pointerdown";
-        var POINTER_MOVE2 = Browser.msPointer ? "MSPointerMove" : "pointermove";
-        var POINTER_UP2 = Browser.msPointer ? "MSPointerUp" : "pointerup";
-        var POINTER_CANCEL2 = Browser.msPointer ? "MSPointerCancel" : "pointercancel";
-        var pEvent2 = {
-          touchstart: POINTER_DOWN2,
-          touchmove: POINTER_MOVE2,
-          touchend: POINTER_UP2,
-          touchcancel: POINTER_CANCEL2
+        var POINTER_DOWN = Browser.msPointer ? "MSPointerDown" : "pointerdown";
+        var POINTER_MOVE = Browser.msPointer ? "MSPointerMove" : "pointermove";
+        var POINTER_UP = Browser.msPointer ? "MSPointerUp" : "pointerup";
+        var POINTER_CANCEL = Browser.msPointer ? "MSPointerCancel" : "pointercancel";
+        var pEvent = {
+          touchstart: POINTER_DOWN,
+          touchmove: POINTER_MOVE,
+          touchend: POINTER_UP,
+          touchcancel: POINTER_CANCEL
         };
-        var handle2 = {
-          touchstart: _onPointerStart2,
-          touchmove: _handlePointer2,
-          touchend: _handlePointer2,
-          touchcancel: _handlePointer2
+        var handle = {
+          touchstart: _onPointerStart,
+          touchmove: _handlePointer,
+          touchend: _handlePointer,
+          touchcancel: _handlePointer
         };
-        var _pointers2 = {};
-        var _pointerDocListener2 = false;
-        function addPointerListener2(obj, type, handler) {
+        var _pointers = {};
+        var _pointerDocListener = false;
+        function addPointerListener(obj, type, handler) {
           if (type === "touchstart") {
-            _addPointerDocListener2();
+            _addPointerDocListener();
           }
-          if (!handle2[type]) {
+          if (!handle[type]) {
             console.warn("wrong event specified:", type);
-            return falseFn2;
+            return falseFn;
           }
-          handler = handle2[type].bind(this, handler);
-          obj.addEventListener(pEvent2[type], handler, false);
+          handler = handle[type].bind(this, handler);
+          obj.addEventListener(pEvent[type], handler, false);
           return handler;
         }
-        function removePointerListener2(obj, type, handler) {
-          if (!pEvent2[type]) {
+        function removePointerListener(obj, type, handler) {
+          if (!pEvent[type]) {
             console.warn("wrong event specified:", type);
             return;
           }
-          obj.removeEventListener(pEvent2[type], handler, false);
+          obj.removeEventListener(pEvent[type], handler, false);
         }
-        function _globalPointerDown2(e) {
-          _pointers2[e.pointerId] = e;
+        function _globalPointerDown(e) {
+          _pointers[e.pointerId] = e;
         }
-        function _globalPointerMove2(e) {
-          if (_pointers2[e.pointerId]) {
-            _pointers2[e.pointerId] = e;
+        function _globalPointerMove(e) {
+          if (_pointers[e.pointerId]) {
+            _pointers[e.pointerId] = e;
           }
         }
-        function _globalPointerUp2(e) {
-          delete _pointers2[e.pointerId];
+        function _globalPointerUp(e) {
+          delete _pointers[e.pointerId];
         }
-        function _addPointerDocListener2() {
-          if (!_pointerDocListener2) {
-            document.addEventListener(POINTER_DOWN2, _globalPointerDown2, true);
-            document.addEventListener(POINTER_MOVE2, _globalPointerMove2, true);
-            document.addEventListener(POINTER_UP2, _globalPointerUp2, true);
-            document.addEventListener(POINTER_CANCEL2, _globalPointerUp2, true);
-            _pointerDocListener2 = true;
+        function _addPointerDocListener() {
+          if (!_pointerDocListener) {
+            document.addEventListener(POINTER_DOWN, _globalPointerDown, true);
+            document.addEventListener(POINTER_MOVE, _globalPointerMove, true);
+            document.addEventListener(POINTER_UP, _globalPointerUp, true);
+            document.addEventListener(POINTER_CANCEL, _globalPointerUp, true);
+            _pointerDocListener = true;
           }
         }
-        function _handlePointer2(handler, e) {
+        function _handlePointer(handler, e) {
           if (e.pointerType === (e.MSPOINTER_TYPE_MOUSE || "mouse")) {
             return;
           }
           e.touches = [];
-          for (var i in _pointers2) {
-            e.touches.push(_pointers2[i]);
+          for (var i in _pointers) {
+            e.touches.push(_pointers[i]);
           }
           e.changedTouches = [e];
           handler(e);
         }
-        function _onPointerStart2(handler, e) {
+        function _onPointerStart(handler, e) {
           if (e.MSPOINTER_TYPE_TOUCH && e.pointerType === e.MSPOINTER_TYPE_TOUCH) {
-            preventDefault2(e);
+            preventDefault(e);
           }
-          _handlePointer2(handler, e);
+          _handlePointer(handler, e);
         }
-        function makeDblclick2(event) {
+        function makeDblclick(event) {
           var newEvent = {}, prop, i;
           for (i in event) {
             prop = event[i];
@@ -1463,8 +1481,8 @@
           newEvent._simulated = true;
           return newEvent;
         }
-        var delay2 = 200;
-        function addDoubleTapListener2(obj, handler) {
+        var delay = 200;
+        function addDoubleTapListener(obj, handler) {
           obj.addEventListener("dblclick", handler);
           var last = 0, detail;
           function simDblclick(e) {
@@ -1475,7 +1493,7 @@
             if (e.pointerType === "mouse" || e.sourceCapabilities && !e.sourceCapabilities.firesTouchEvents) {
               return;
             }
-            var path = getPropagationPath2(e);
+            var path = getPropagationPath(e);
             if (path.some(function(el) {
               return el instanceof HTMLLabelElement && el.attributes.for;
             }) && !path.some(function(el) {
@@ -1484,10 +1502,10 @@
               return;
             }
             var now = Date.now();
-            if (now - last <= delay2) {
+            if (now - last <= delay) {
               detail++;
               if (detail === 2) {
-                handler(makeDblclick2(e));
+                handler(makeDblclick(e));
               }
             } else {
               detail = 1;
@@ -1500,25 +1518,25 @@
             simDblclick
           };
         }
-        function removeDoubleTapListener2(obj, handlers) {
+        function removeDoubleTapListener(obj, handlers) {
           obj.removeEventListener("dblclick", handlers.dblclick);
           obj.removeEventListener("click", handlers.simDblclick);
         }
-        var TRANSFORM2 = testProp2(
+        var TRANSFORM = testProp(
           ["transform", "webkitTransform", "OTransform", "MozTransform", "msTransform"]
         );
-        var TRANSITION2 = testProp2(
+        var TRANSITION = testProp(
           ["webkitTransition", "transition", "OTransition", "MozTransition", "msTransition"]
         );
-        var TRANSITION_END2 = TRANSITION2 === "webkitTransition" || TRANSITION2 === "OTransition" ? TRANSITION2 + "End" : "transitionend";
-        function get2(id) {
+        var TRANSITION_END = TRANSITION === "webkitTransition" || TRANSITION === "OTransition" ? TRANSITION + "End" : "transitionend";
+        function get(id) {
           return typeof id === "string" ? document.getElementById(id) : id;
         }
-        function getStyle(el, style3) {
-          var value = el.style[style3] || el.currentStyle && el.currentStyle[style3];
+        function getStyle(el, style2) {
+          var value = el.style[style2] || el.currentStyle && el.currentStyle[style2];
           if ((!value || value === "auto") && document.defaultView) {
             var css = document.defaultView.getComputedStyle(el, null);
-            value = css ? css[style3] : null;
+            value = css ? css[style2] : null;
           }
           return value === "auto" ? null : value;
         }
@@ -1562,7 +1580,7 @@
         }
         function addClass(el, name) {
           if (el.classList !== void 0) {
-            var classes = splitWords2(name);
+            var classes = splitWords(name);
             for (var i = 0, len = classes.length; i < len; i++) {
               el.classList.add(classes[i]);
             }
@@ -1575,7 +1593,7 @@
           if (el.classList !== void 0) {
             el.classList.remove(name);
           } else {
-            setClass(el, trim2((" " + getClass(el) + " ").replace(" " + name + " ", " ")));
+            setClass(el, trim((" " + getClass(el) + " ").replace(" " + name + " ", " ")));
           }
         }
         function setClass(el, name) {
@@ -1615,18 +1633,18 @@
             el.style.filter += " progid:" + filterName + "(opacity=" + value + ")";
           }
         }
-        function testProp2(props) {
-          var style3 = document.documentElement.style;
+        function testProp(props) {
+          var style2 = document.documentElement.style;
           for (var i = 0; i < props.length; i++) {
-            if (props[i] in style3) {
+            if (props[i] in style2) {
               return props[i];
             }
           }
           return false;
         }
         function setTransform(el, offset, scale2) {
-          var pos = offset || new Point2(0, 0);
-          el.style[TRANSFORM2] = (Browser.ie3d ? "translate(" + pos.x + "px," + pos.y + "px)" : "translate3d(" + pos.x + "px," + pos.y + "px,0)") + (scale2 ? " scale(" + scale2 + ")" : "");
+          var pos = offset || new Point(0, 0);
+          el.style[TRANSFORM] = (Browser.ie3d ? "translate(" + pos.x + "px," + pos.y + "px)" : "translate3d(" + pos.x + "px," + pos.y + "px,0)") + (scale2 ? " scale(" + scale2 + ")" : "");
         }
         function setPosition(el, point) {
           el._leaflet_pos = point;
@@ -1638,41 +1656,41 @@
           }
         }
         function getPosition(el) {
-          return el._leaflet_pos || new Point2(0, 0);
+          return el._leaflet_pos || new Point(0, 0);
         }
-        var disableTextSelection2;
-        var enableTextSelection2;
-        var _userSelect2;
+        var disableTextSelection;
+        var enableTextSelection;
+        var _userSelect;
         if ("onselectstart" in document) {
-          disableTextSelection2 = function() {
-            on2(window, "selectstart", preventDefault2);
+          disableTextSelection = function() {
+            on(window, "selectstart", preventDefault);
           };
-          enableTextSelection2 = function() {
-            off2(window, "selectstart", preventDefault2);
+          enableTextSelection = function() {
+            off(window, "selectstart", preventDefault);
           };
         } else {
-          var userSelectProperty = testProp2(
+          var userSelectProperty = testProp(
             ["userSelect", "WebkitUserSelect", "OUserSelect", "MozUserSelect", "msUserSelect"]
           );
-          disableTextSelection2 = function() {
+          disableTextSelection = function() {
             if (userSelectProperty) {
-              var style3 = document.documentElement.style;
-              _userSelect2 = style3[userSelectProperty];
-              style3[userSelectProperty] = "none";
+              var style2 = document.documentElement.style;
+              _userSelect = style2[userSelectProperty];
+              style2[userSelectProperty] = "none";
             }
           };
-          enableTextSelection2 = function() {
+          enableTextSelection = function() {
             if (userSelectProperty) {
-              document.documentElement.style[userSelectProperty] = _userSelect2;
-              _userSelect2 = void 0;
+              document.documentElement.style[userSelectProperty] = _userSelect;
+              _userSelect = void 0;
             }
           };
         }
         function disableImageDrag() {
-          on2(window, "dragstart", preventDefault2);
+          on(window, "dragstart", preventDefault);
         }
         function enableImageDrag() {
-          off2(window, "dragstart", preventDefault2);
+          off(window, "dragstart", preventDefault);
         }
         var _outlineElement, _outlineStyle;
         function preventOutline(element) {
@@ -1686,7 +1704,7 @@
           _outlineElement = element;
           _outlineStyle = element.style.outlineStyle;
           element.style.outlineStyle = "none";
-          on2(window, "keydown", restoreOutline);
+          on(window, "keydown", restoreOutline);
         }
         function restoreOutline() {
           if (!_outlineElement) {
@@ -1695,7 +1713,7 @@
           _outlineElement.style.outlineStyle = _outlineStyle;
           _outlineElement = void 0;
           _outlineStyle = void 0;
-          off2(window, "keydown", restoreOutline);
+          off(window, "keydown", restoreOutline);
         }
         function getSizedParentNode(element) {
           do {
@@ -1703,7 +1721,7 @@
           } while ((!element.offsetWidth || !element.offsetHeight) && element !== document.body);
           return element;
         }
-        function getScale2(element) {
+        function getScale(element) {
           var rect = element.getBoundingClientRect();
           return {
             x: rect.width / element.offsetWidth || 1,
@@ -1713,10 +1731,10 @@
         }
         var DomUtil = {
           __proto__: null,
-          TRANSFORM: TRANSFORM2,
-          TRANSITION: TRANSITION2,
-          TRANSITION_END: TRANSITION_END2,
-          get: get2,
+          TRANSFORM,
+          TRANSITION,
+          TRANSITION_END,
+          get,
           getStyle,
           create: create$1,
           remove,
@@ -1729,75 +1747,75 @@
           setClass,
           getClass,
           setOpacity,
-          testProp: testProp2,
+          testProp,
           setTransform,
           setPosition,
           getPosition,
           get disableTextSelection() {
-            return disableTextSelection2;
+            return disableTextSelection;
           },
           get enableTextSelection() {
-            return enableTextSelection2;
+            return enableTextSelection;
           },
           disableImageDrag,
           enableImageDrag,
           preventOutline,
           restoreOutline,
           getSizedParentNode,
-          getScale: getScale2
+          getScale
         };
-        function on2(obj, types, fn, context) {
+        function on(obj, types, fn, context) {
           if (types && typeof types === "object") {
             for (var type in types) {
-              addOne2(obj, type, types[type], fn);
+              addOne(obj, type, types[type], fn);
             }
           } else {
-            types = splitWords2(types);
+            types = splitWords(types);
             for (var i = 0, len = types.length; i < len; i++) {
-              addOne2(obj, types[i], fn, context);
+              addOne(obj, types[i], fn, context);
             }
           }
           return this;
         }
-        var eventsKey2 = "_leaflet_events";
-        function off2(obj, types, fn, context) {
+        var eventsKey = "_leaflet_events";
+        function off(obj, types, fn, context) {
           if (arguments.length === 1) {
-            batchRemove2(obj);
-            delete obj[eventsKey2];
+            batchRemove(obj);
+            delete obj[eventsKey];
           } else if (types && typeof types === "object") {
             for (var type in types) {
-              removeOne2(obj, type, types[type], fn);
+              removeOne(obj, type, types[type], fn);
             }
           } else {
-            types = splitWords2(types);
+            types = splitWords(types);
             if (arguments.length === 2) {
-              batchRemove2(obj, function(type2) {
-                return indexOf2(types, type2) !== -1;
+              batchRemove(obj, function(type2) {
+                return indexOf(types, type2) !== -1;
               });
             } else {
               for (var i = 0, len = types.length; i < len; i++) {
-                removeOne2(obj, types[i], fn, context);
+                removeOne(obj, types[i], fn, context);
               }
             }
           }
           return this;
         }
-        function batchRemove2(obj, filterFn) {
-          for (var id in obj[eventsKey2]) {
+        function batchRemove(obj, filterFn) {
+          for (var id in obj[eventsKey]) {
             var type = id.split(/\d/)[0];
             if (!filterFn || filterFn(type)) {
-              removeOne2(obj, type, null, null, id);
+              removeOne(obj, type, null, null, id);
             }
           }
         }
-        var mouseSubst2 = {
+        var mouseSubst = {
           mouseenter: "mouseover",
           mouseleave: "mouseout",
           wheel: !("onwheel" in window) && "mousewheel"
         };
-        function addOne2(obj, type, fn, context) {
-          var id = type + stamp2(fn) + (context ? "_" + stamp2(context) : "");
-          if (obj[eventsKey2] && obj[eventsKey2][id]) {
+        function addOne(obj, type, fn, context) {
+          var id = type + stamp(fn) + (context ? "_" + stamp(context) : "");
+          if (obj[eventsKey] && obj[eventsKey][id]) {
             return this;
           }
           var handler = function(e) {
@@ -1805,45 +1823,45 @@
           };
           var originalHandler = handler;
           if (!Browser.touchNative && Browser.pointer && type.indexOf("touch") === 0) {
-            handler = addPointerListener2(obj, type, handler);
+            handler = addPointerListener(obj, type, handler);
           } else if (Browser.touch && type === "dblclick") {
-            handler = addDoubleTapListener2(obj, handler);
+            handler = addDoubleTapListener(obj, handler);
           } else if ("addEventListener" in obj) {
             if (type === "touchstart" || type === "touchmove" || type === "wheel" || type === "mousewheel") {
-              obj.addEventListener(mouseSubst2[type] || type, handler, Browser.passiveEvents ? { passive: false } : false);
+              obj.addEventListener(mouseSubst[type] || type, handler, Browser.passiveEvents ? { passive: false } : false);
             } else if (type === "mouseenter" || type === "mouseleave") {
               handler = function(e) {
                 e = e || window.event;
-                if (isExternalTarget2(obj, e)) {
+                if (isExternalTarget(obj, e)) {
                   originalHandler(e);
                 }
               };
-              obj.addEventListener(mouseSubst2[type], handler, false);
+              obj.addEventListener(mouseSubst[type], handler, false);
             } else {
               obj.addEventListener(type, originalHandler, false);
             }
           } else {
             obj.attachEvent("on" + type, handler);
           }
-          obj[eventsKey2] = obj[eventsKey2] || {};
-          obj[eventsKey2][id] = handler;
+          obj[eventsKey] = obj[eventsKey] || {};
+          obj[eventsKey][id] = handler;
         }
-        function removeOne2(obj, type, fn, context, id) {
-          id = id || type + stamp2(fn) + (context ? "_" + stamp2(context) : "");
-          var handler = obj[eventsKey2] && obj[eventsKey2][id];
+        function removeOne(obj, type, fn, context, id) {
+          id = id || type + stamp(fn) + (context ? "_" + stamp(context) : "");
+          var handler = obj[eventsKey] && obj[eventsKey][id];
           if (!handler) {
             return this;
           }
           if (!Browser.touchNative && Browser.pointer && type.indexOf("touch") === 0) {
-            removePointerListener2(obj, type, handler);
+            removePointerListener(obj, type, handler);
           } else if (Browser.touch && type === "dblclick") {
-            removeDoubleTapListener2(obj, handler);
+            removeDoubleTapListener(obj, handler);
           } else if ("removeEventListener" in obj) {
-            obj.removeEventListener(mouseSubst2[type] || type, handler, false);
+            obj.removeEventListener(mouseSubst[type] || type, handler, false);
           } else {
             obj.detachEvent("on" + type, handler);
           }
-          obj[eventsKey2][id] = null;
+          obj[eventsKey][id] = null;
         }
         function stopPropagation(e) {
           if (e.stopPropagation) {
@@ -1856,15 +1874,15 @@
           return this;
         }
         function disableScrollPropagation(el) {
-          addOne2(el, "wheel", stopPropagation);
+          addOne(el, "wheel", stopPropagation);
           return this;
         }
         function disableClickPropagation(el) {
-          on2(el, "mousedown touchstart dblclick contextmenu", stopPropagation);
+          on(el, "mousedown touchstart dblclick contextmenu", stopPropagation);
           el["_leaflet_disable_click"] = true;
           return this;
         }
-        function preventDefault2(e) {
+        function preventDefault(e) {
           if (e.preventDefault) {
             e.preventDefault();
           } else {
@@ -1873,11 +1891,11 @@
           return this;
         }
         function stop(e) {
-          preventDefault2(e);
+          preventDefault(e);
           stopPropagation(e);
           return this;
         }
-        function getPropagationPath2(ev) {
+        function getPropagationPath(ev) {
           if (ev.composedPath) {
             return ev.composedPath();
           }
@@ -1891,21 +1909,21 @@
         }
         function getMousePosition(e, container) {
           if (!container) {
-            return new Point2(e.clientX, e.clientY);
+            return new Point(e.clientX, e.clientY);
           }
-          var scale2 = getScale2(container), offset = scale2.boundingClientRect;
-          return new Point2(
+          var scale2 = getScale(container), offset = scale2.boundingClientRect;
+          return new Point(
             // offset.left/top values are in page scale (like clientX/Y),
             // whereas clientLeft/Top (border width) values are the original values (before CSS scale applies).
             (e.clientX - offset.left) / scale2.x - container.clientLeft,
             (e.clientY - offset.top) / scale2.y - container.clientTop
           );
         }
-        var wheelPxFactor2 = Browser.linux && Browser.chrome ? window.devicePixelRatio : Browser.mac ? window.devicePixelRatio * 3 : window.devicePixelRatio > 0 ? 2 * window.devicePixelRatio : 1;
+        var wheelPxFactor = Browser.linux && Browser.chrome ? window.devicePixelRatio : Browser.mac ? window.devicePixelRatio * 3 : window.devicePixelRatio > 0 ? 2 * window.devicePixelRatio : 1;
         function getWheelDelta(e) {
           return Browser.edge ? e.wheelDeltaY / 2 : (
             // Don't trust window-geometry-based delta
-            e.deltaY && e.deltaMode === 0 ? -e.deltaY / wheelPxFactor2 : (
+            e.deltaY && e.deltaMode === 0 ? -e.deltaY / wheelPxFactor : (
               // Pixels
               e.deltaY && e.deltaMode === 1 ? -e.deltaY * 20 : (
                 // Lines
@@ -1929,7 +1947,7 @@
             )
           );
         }
-        function isExternalTarget2(el, e) {
+        function isExternalTarget(el, e) {
           var related = e.relatedTarget;
           if (!related) {
             return true;
@@ -1945,19 +1963,19 @@
         }
         var DomEvent = {
           __proto__: null,
-          on: on2,
-          off: off2,
+          on,
+          off,
           stopPropagation,
           disableScrollPropagation,
           disableClickPropagation,
-          preventDefault: preventDefault2,
+          preventDefault,
           stop,
-          getPropagationPath: getPropagationPath2,
+          getPropagationPath,
           getMousePosition,
           getWheelDelta,
-          isExternalTarget: isExternalTarget2,
-          addListener: on2,
-          removeListener: off2
+          isExternalTarget,
+          addListener: on,
+          removeListener: off
         };
         var PosAnimation = Evented.extend({
           // @method run(el: HTMLElement, newPos: Point, duration?: Number, easeLinearity?: Number)
@@ -2113,10 +2131,10 @@
               this.setView(toLatLng(options.center), options.zoom, { reset: true });
             }
             this.callInitHooks();
-            this._zoomAnimated = TRANSITION2 && Browser.any3d && !Browser.mobileOpera && this.options.zoomAnimation;
+            this._zoomAnimated = TRANSITION && Browser.any3d && !Browser.mobileOpera && this.options.zoomAnimation;
             if (this._zoomAnimated) {
               this._createAnimProxy();
-              on2(this._proxy, TRANSITION_END2, this._catchTransitionEnd, this);
+              on(this._proxy, TRANSITION_END, this._catchTransitionEnd, this);
             }
             this._addLayers(this.options.layers);
           },
@@ -2171,13 +2189,13 @@
           // @method setZoomAround(offset: Point, zoom: Number, options: Zoom options): this
           // Zooms the map while keeping a specified pixel on the map (relative to the top-left corner) stationary.
           setZoomAround: function(latlng, zoom2, options) {
-            var scale2 = this.getZoomScale(zoom2), viewHalf = this.getSize().divideBy(2), containerPoint = latlng instanceof Point2 ? latlng : this.latLngToContainerPoint(latlng), centerOffset = containerPoint.subtract(viewHalf).multiplyBy(1 - 1 / scale2), newCenter = this.containerPointToLatLng(viewHalf.add(centerOffset));
+            var scale2 = this.getZoomScale(zoom2), viewHalf = this.getSize().divideBy(2), containerPoint = latlng instanceof Point ? latlng : this.latLngToContainerPoint(latlng), centerOffset = containerPoint.subtract(viewHalf).multiplyBy(1 - 1 / scale2), newCenter = this.containerPointToLatLng(viewHalf.add(centerOffset));
             return this.setView(newCenter, zoom2, { zoom: options });
           },
           _getBoundsCenterZoom: function(bounds, options) {
             options = options || {};
             bounds = bounds.getBounds ? bounds.getBounds() : toLatLngBounds(bounds);
-            var paddingTL = toPoint2(options.paddingTopLeft || options.padding || [0, 0]), paddingBR = toPoint2(options.paddingBottomRight || options.padding || [0, 0]), zoom2 = this.getBoundsZoom(bounds, false, paddingTL.add(paddingBR));
+            var paddingTL = toPoint(options.paddingTopLeft || options.padding || [0, 0]), paddingBR = toPoint(options.paddingBottomRight || options.padding || [0, 0]), zoom2 = this.getBoundsZoom(bounds, false, paddingTL.add(paddingBR));
             zoom2 = typeof options.maxZoom === "number" ? Math.min(options.maxZoom, zoom2) : zoom2;
             if (zoom2 === Infinity) {
               return {
@@ -2216,7 +2234,7 @@
           // @method panBy(offset: Point, options?: Pan options): this
           // Pans the map by a given number of pixels (animated).
           panBy: function(offset, options) {
-            offset = toPoint2(offset).round();
+            offset = toPoint(offset).round();
             options = options || {};
             if (!offset.x && !offset.y) {
               return this.fire("moveend");
@@ -2368,7 +2386,7 @@
           // the map will not be panned.
           panInside: function(latlng, options) {
             options = options || {};
-            var paddingTL = toPoint2(options.paddingTopLeft || options.padding || [0, 0]), paddingBR = toPoint2(options.paddingBottomRight || options.padding || [0, 0]), pixelCenter = this.project(this.getCenter()), pixelPoint = this.project(latlng), pixelBounds = this.getPixelBounds(), paddedBounds = toBounds([pixelBounds.min.add(paddingTL), pixelBounds.max.subtract(paddingBR)]), paddedSize = paddedBounds.getSize();
+            var paddingTL = toPoint(options.paddingTopLeft || options.padding || [0, 0]), paddingBR = toPoint(options.paddingBottomRight || options.padding || [0, 0]), pixelCenter = this.project(this.getCenter()), pixelPoint = this.project(latlng), pixelBounds = this.getPixelBounds(), paddedBounds = toBounds([pixelBounds.min.add(paddingTL), pixelBounds.max.subtract(paddingBR)]), paddedSize = paddedBounds.getSize();
             if (!paddedBounds.contains(pixelPoint)) {
               this._enforcingBounds = true;
               var centerOffset = pixelPoint.subtract(paddedBounds.getCenter());
@@ -2627,7 +2645,7 @@
           // the given bounds in its entirety.
           getBoundsZoom: function(bounds, inside, padding) {
             bounds = toLatLngBounds(bounds);
-            padding = toPoint2(padding || [0, 0]);
+            padding = toPoint(padding || [0, 0]);
             var zoom2 = this.getZoom() || 0, min = this.getMinZoom(), max = this.getMaxZoom(), nw = bounds.getNorthWest(), se = bounds.getSouthEast(), size = this.getSize().subtract(padding), boundsSize = toBounds(this.project(se, zoom2), this.project(nw, zoom2)).getSize(), snap = Browser.any3d ? this.options.zoomSnap : 1, scalex = size.x / boundsSize.x, scaley = size.y / boundsSize.y, scale2 = inside ? Math.max(scalex, scaley) : Math.min(scalex, scaley);
             zoom2 = this.getScaleZoom(scale2, zoom2);
             if (snap) {
@@ -2640,7 +2658,7 @@
           // Returns the current size of the map container (in pixels).
           getSize: function() {
             if (!this._size || this._sizeChanged) {
-              this._size = new Point2(
+              this._size = new Point(
                 this._container.clientWidth || 0,
                 this._container.clientHeight || 0
               );
@@ -2720,13 +2738,13 @@
           // Inverse of [`project`](#map-project).
           unproject: function(point, zoom2) {
             zoom2 = zoom2 === void 0 ? this._zoom : zoom2;
-            return this.options.crs.pointToLatLng(toPoint2(point), zoom2);
+            return this.options.crs.pointToLatLng(toPoint(point), zoom2);
           },
           // @method layerPointToLatLng(point: Point): LatLng
           // Given a pixel coordinate relative to the [origin pixel](#map-getpixelorigin),
           // returns the corresponding geographical coordinate (for the current zoom level).
           layerPointToLatLng: function(point) {
-            var projectedPoint = toPoint2(point).add(this.getPixelOrigin());
+            var projectedPoint = toPoint(point).add(this.getPixelOrigin());
             return this.unproject(projectedPoint);
           },
           // @method latLngToLayerPoint(latlng: LatLng): Point
@@ -2764,19 +2782,19 @@
           // Given a pixel coordinate relative to the map container, returns the corresponding
           // pixel coordinate relative to the [origin pixel](#map-getpixelorigin).
           containerPointToLayerPoint: function(point) {
-            return toPoint2(point).subtract(this._getMapPanePos());
+            return toPoint(point).subtract(this._getMapPanePos());
           },
           // @method layerPointToContainerPoint(point: Point): Point
           // Given a pixel coordinate relative to the [origin pixel](#map-getpixelorigin),
           // returns the corresponding pixel coordinate relative to the map container.
           layerPointToContainerPoint: function(point) {
-            return toPoint2(point).add(this._getMapPanePos());
+            return toPoint(point).add(this._getMapPanePos());
           },
           // @method containerPointToLatLng(point: Point): LatLng
           // Given a pixel coordinate relative to the map container, returns
           // the corresponding geographical coordinate (for the current zoom level).
           containerPointToLatLng: function(point) {
-            var layerPoint = this.containerPointToLayerPoint(toPoint2(point));
+            var layerPoint = this.containerPointToLayerPoint(toPoint(point));
             return this.layerPointToLatLng(layerPoint);
           },
           // @method latLngToContainerPoint(latlng: LatLng): Point
@@ -2805,14 +2823,14 @@
           },
           // map initialization methods
           _initContainer: function(id) {
-            var container = this._container = get2(id);
+            var container = this._container = get(id);
             if (!container) {
               throw new Error("Map container not found.");
             } else if (container._leaflet_id) {
               throw new Error("Map container is already initialized.");
             }
-            on2(container, "scroll", this._onScroll, this);
-            this._containerId = stamp2(container);
+            on(container, "scroll", this._onScroll, this);
+            this._containerId = stamp(container);
           },
           _initLayout: function() {
             var container = this._container;
@@ -2831,7 +2849,7 @@
             var panes = this._panes = {};
             this._paneRenderers = {};
             this._mapPane = this.createPane("mapPane", this._container);
-            setPosition(this._mapPane, new Point2(0, 0));
+            setPosition(this._mapPane, new Point(0, 0));
             this.createPane("tilePane");
             this.createPane("overlayPane");
             this.createPane("shadowPane");
@@ -2846,7 +2864,7 @@
           // private methods that modify map state
           // @section Map state change events
           _resetView: function(center, zoom2, noMoveStart) {
-            setPosition(this._mapPane, new Point2(0, 0));
+            setPosition(this._mapPane, new Point(0, 0));
             var loading = !this._loaded;
             this._loaded = true;
             zoom2 = this._limitZoom(zoom2);
@@ -2918,8 +2936,8 @@
           // @section Interaction events
           _initEvents: function(remove2) {
             this._targets = {};
-            this._targets[stamp2(this._container)] = this;
-            var onOff = remove2 ? off2 : on2;
+            this._targets[stamp(this._container)] = this;
+            var onOff = remove2 ? off : on;
             onOff(this._container, "click dblclick mousedown mouseup mouseover mouseout mousemove contextmenu keypress keydown keyup", this._handleDOMEvent, this);
             if (this.options.trackResize) {
               onOff(window, "resize", this._onResize, this);
@@ -2950,13 +2968,13 @@
           _findEventTargets: function(e, type) {
             var targets = [], target, isHover = type === "mouseout" || type === "mouseover", src = e.target || e.srcElement, dragging = false;
             while (src) {
-              target = this._targets[stamp2(src)];
+              target = this._targets[stamp(src)];
               if (target && (type === "click" || type === "preclick") && this._draggableMoved(target)) {
                 dragging = true;
                 break;
               }
               if (target && target.listens(type, true)) {
-                if (isHover && !isExternalTarget2(src, e)) {
+                if (isHover && !isExternalTarget(src, e)) {
                   break;
                 }
                 targets.push(target);
@@ -3014,7 +3032,7 @@
               return;
             }
             if (type === "contextmenu") {
-              preventDefault2(e);
+              preventDefault(e);
             }
             var target = targets[0];
             var data = {
@@ -3028,7 +3046,7 @@
             }
             for (i = 0; i < targets.length; i++) {
               targets[i].fire(type, data, true);
-              if (data.originalEvent._stopped || targets[i].options.bubblingMouseEvents === false && indexOf2(this._mouseEvents, type) !== -1) {
+              if (data.originalEvent._stopped || targets[i].options.bubblingMouseEvents === false && indexOf(this._mouseEvents, type) !== -1) {
                 return;
               }
             }
@@ -3057,7 +3075,7 @@
           },
           // private methods for getting map state
           _getMapPanePos: function() {
-            return getPosition(this._mapPane) || new Point2(0, 0);
+            return getPosition(this._mapPane) || new Point(0, 0);
           },
           _moved: function() {
             var pos = this._getMapPanePos();
@@ -3117,7 +3135,7 @@
               this.project(maxBounds.getNorthEast(), zoom2),
               this.project(maxBounds.getSouthWest(), zoom2)
             ), minOffset = projectedMaxBounds.min.subtract(pxBounds.min), maxOffset = projectedMaxBounds.max.subtract(pxBounds.max), dx = this._rebound(minOffset.x, -maxOffset.x), dy = this._rebound(minOffset.y, -maxOffset.y);
-            return new Point2(dx, dy);
+            return new Point(dx, dy);
           },
           _rebound: function(left, right) {
             return left + right > 0 ? Math.round(left - right) / 2 : Math.max(0, Math.ceil(left)) - Math.max(0, Math.floor(right));
@@ -3148,7 +3166,7 @@
             var proxy = this._proxy = create$1("div", "leaflet-proxy leaflet-zoom-animated");
             this._panes.mapPane.appendChild(proxy);
             this.on("zoomanim", function(e) {
-              var prop = TRANSFORM2, transform = this._proxy.style[prop];
+              var prop = TRANSFORM, transform = this._proxy.style[prop];
               setTransform(this._proxy, this.project(e.center, e.zoom), this.getZoomScale(e.zoom, 1));
               if (transform === this._proxy.style[prop] && this._animatingZoom) {
                 this._onZoomTransitionEnd();
@@ -3420,7 +3438,7 @@
           // Remove the given layer from the control.
           removeLayer: function(layer) {
             layer.off("add remove", this._onLayerChange, this);
-            var obj = this._getLayer(stamp2(layer));
+            var obj = this._getLayer(stamp(layer));
             if (obj) {
               this._layers.splice(this._layers.indexOf(obj), 1);
             }
@@ -3455,7 +3473,7 @@
             var section = this._section = create$1("section", className + "-list");
             if (collapsed) {
               this._map.on("click", this.collapse, this);
-              on2(container, {
+              on(container, {
                 mouseenter: this._expandSafely,
                 mouseleave: this.collapse
               }, this);
@@ -3464,7 +3482,7 @@
             link.href = "#";
             link.title = "Layers";
             link.setAttribute("role", "button");
-            on2(link, {
+            on(link, {
               keydown: function(e) {
                 if (e.keyCode === 13) {
                   this._expandSafely();
@@ -3472,7 +3490,7 @@
               },
               // Certain screen readers intercept the key event and instead send a click event
               click: function(e) {
-                preventDefault2(e);
+                preventDefault(e);
                 this._expandSafely();
               }
             }, this);
@@ -3486,7 +3504,7 @@
           },
           _getLayer: function(id) {
             for (var i = 0; i < this._layers.length; i++) {
-              if (this._layers[i] && stamp2(this._layers[i].layer) === id) {
+              if (this._layers[i] && stamp(this._layers[i].layer) === id) {
                 return this._layers[i];
               }
             }
@@ -3537,7 +3555,7 @@
             if (!this._handlingClick) {
               this._update();
             }
-            var obj = this._getLayer(stamp2(e.target));
+            var obj = this._getLayer(stamp(e.target));
             var type = obj.overlay ? e.type === "add" ? "overlayadd" : "overlayremove" : e.type === "add" ? "baselayerchange" : null;
             if (type) {
               this._map.fire(type, obj);
@@ -3558,11 +3576,11 @@
               input.className = "leaflet-control-layers-selector";
               input.defaultChecked = checked;
             } else {
-              input = this._createRadioElement("leaflet-base-layers_" + stamp2(this), checked);
+              input = this._createRadioElement("leaflet-base-layers_" + stamp(this), checked);
             }
             this._layerControlInputs.push(input);
-            input.layerId = stamp2(obj.layer);
-            on2(input, "click", this._onInputClick, this);
+            input.layerId = stamp(obj.layer);
+            on(input, "click", this._onInputClick, this);
             var name = document.createElement("span");
             name.innerHTML = " " + obj.name;
             var holder = document.createElement("span");
@@ -3620,11 +3638,11 @@
           _expandSafely: function() {
             var section = this._section;
             this._preventClick = true;
-            on2(section, "click", preventDefault2);
+            on(section, "click", preventDefault);
             this.expand();
             var that = this;
             setTimeout(function() {
-              off2(section, "click", preventDefault2);
+              off(section, "click", preventDefault);
               that._preventClick = false;
             });
           }
@@ -3701,9 +3719,9 @@
             link.setAttribute("role", "button");
             link.setAttribute("aria-label", title);
             disableClickPropagation(link);
-            on2(link, "click", stop);
-            on2(link, "click", fn, this);
-            on2(link, "click", this._refocusOnMap, this);
+            on(link, "click", stop);
+            on(link, "click", fn, this);
+            on(link, "click", this._refocusOnMap, this);
             return link;
           },
           _updateDisabled: function() {
@@ -3987,7 +4005,7 @@
             if (this._enabled) {
               return;
             }
-            on2(this._dragStartTarget, START, this._onDown, this);
+            on(this._dragStartTarget, START, this._onDown, this);
             this._enabled = true;
           },
           // @method disable()
@@ -3999,7 +4017,7 @@
             if (Draggable._dragging === this) {
               this.finishDrag(true);
             }
-            off2(this._dragStartTarget, START, this._onDown, this);
+            off(this._dragStartTarget, START, this._onDown, this);
             this._enabled = false;
             this._moved = false;
           },
@@ -4025,18 +4043,18 @@
               preventOutline(this._element);
             }
             disableImageDrag();
-            disableTextSelection2();
+            disableTextSelection();
             if (this._moving) {
               return;
             }
             this.fire("down");
             var first = e.touches ? e.touches[0] : e, sizedParent = getSizedParentNode(this._element);
-            this._startPoint = new Point2(first.clientX, first.clientY);
+            this._startPoint = new Point(first.clientX, first.clientY);
             this._startPos = getPosition(this._element);
-            this._parentScale = getScale2(sizedParent);
+            this._parentScale = getScale(sizedParent);
             var mouseevent = e.type === "mousedown";
-            on2(document, mouseevent ? "mousemove" : "touchmove", this._onMove, this);
-            on2(document, mouseevent ? "mouseup" : "touchend touchcancel", this._onUp, this);
+            on(document, mouseevent ? "mousemove" : "touchmove", this._onMove, this);
+            on(document, mouseevent ? "mouseup" : "touchend touchcancel", this._onUp, this);
           },
           _onMove: function(e) {
             if (!this._enabled) {
@@ -4046,7 +4064,7 @@
               this._moved = true;
               return;
             }
-            var first = e.touches && e.touches.length === 1 ? e.touches[0] : e, offset = new Point2(first.clientX, first.clientY)._subtract(this._startPoint);
+            var first = e.touches && e.touches.length === 1 ? e.touches[0] : e, offset = new Point(first.clientX, first.clientY)._subtract(this._startPoint);
             if (!offset.x && !offset.y) {
               return;
             }
@@ -4055,7 +4073,7 @@
             }
             offset.x /= this._parentScale.x;
             offset.y /= this._parentScale.y;
-            preventDefault2(e);
+            preventDefault(e);
             if (!this._moved) {
               this.fire("dragstart");
               this._moved = true;
@@ -4089,10 +4107,10 @@
               removeClass(this._lastTarget, "leaflet-drag-target");
               this._lastTarget = null;
             }
-            off2(document, "mousemove touchmove", this._onMove, this);
-            off2(document, "mouseup touchend touchcancel", this._onUp, this);
+            off(document, "mousemove touchmove", this._onMove, this);
+            off(document, "mouseup touchend touchcancel", this._onUp, this);
             enableImageDrag();
-            enableTextSelection2();
+            enableTextSelection();
             var fireDragend = this._moved && this._moving;
             this._moving = false;
             Draggable._dragging = false;
@@ -4105,25 +4123,25 @@
           }
         });
         function clipPolygon(points, bounds, round) {
-          var clippedPoints, edges = [1, 4, 2, 8], i, j, k, a, b, len, edge3, p;
+          var clippedPoints, edges = [1, 4, 2, 8], i, j, k, a, b, len, edge2, p;
           for (i = 0, len = points.length; i < len; i++) {
             points[i]._code = _getBitCode(points[i], bounds);
           }
           for (k = 0; k < 4; k++) {
-            edge3 = edges[k];
+            edge2 = edges[k];
             clippedPoints = [];
             for (i = 0, len = points.length, j = len - 1; i < len; j = i++) {
               a = points[i];
               b = points[j];
-              if (!(a._code & edge3)) {
-                if (b._code & edge3) {
-                  p = _getEdgeIntersection(b, a, edge3, bounds, round);
+              if (!(a._code & edge2)) {
+                if (b._code & edge2) {
+                  p = _getEdgeIntersection(b, a, edge2, bounds, round);
                   p._code = _getBitCode(p, bounds);
                   clippedPoints.push(p);
                 }
                 clippedPoints.push(a);
-              } else if (!(b._code & edge3)) {
-                p = _getEdgeIntersection(b, a, edge3, bounds, round);
+              } else if (!(b._code & edge2)) {
+                p = _getEdgeIntersection(b, a, edge2, bounds, round);
                 p._code = _getBitCode(p, bounds);
                 clippedPoints.push(p);
               }
@@ -4167,7 +4185,7 @@
           } else {
             center = [x / area, y / area];
           }
-          var latlngCenter = crs.unproject(toPoint2(center));
+          var latlngCenter = crs.unproject(toPoint(center));
           return toLatLng([latlngCenter.lat + centroidLatLng.lat, latlngCenter.lng + centroidLatLng.lng]);
         }
         function centroid(coords) {
@@ -4281,7 +4299,7 @@
             x = min.x;
             y = a.y + dy * (min.x - a.x) / dx;
           }
-          return new Point2(x, y, round);
+          return new Point(x, y, round);
         }
         function _getBitCode(p, bounds) {
           var code = 0;
@@ -4315,10 +4333,10 @@
           }
           dx = p.x - x;
           dy = p.y - y;
-          return sqDist ? dx * dx + dy * dy : new Point2(x, y);
+          return sqDist ? dx * dx + dy * dy : new Point(x, y);
         }
         function isFlat(latlngs) {
-          return !isArray2(latlngs[0]) || typeof latlngs[0][0] !== "object" && typeof latlngs[0][0] !== "undefined";
+          return !isArray(latlngs[0]) || typeof latlngs[0][0] !== "object" && typeof latlngs[0][0] !== "undefined";
         }
         function _flat(latlngs) {
           console.warn("Deprecated use of _flat, please use L.LineUtil.isFlat instead.");
@@ -4366,7 +4384,7 @@
               }
             }
           }
-          var latlngCenter = crs.unproject(toPoint2(center));
+          var latlngCenter = crs.unproject(toPoint(center));
           return toLatLng([latlngCenter.lat + centroidLatLng.lat, latlngCenter.lng + centroidLatLng.lng]);
         }
         var LineUtil = {
@@ -4384,7 +4402,7 @@
         };
         var LonLat = {
           project: function(latlng) {
-            return new Point2(latlng.lng, latlng.lat);
+            return new Point(latlng.lng, latlng.lat);
           },
           unproject: function(point) {
             return new LatLng2(point.y, point.x);
@@ -4399,7 +4417,7 @@
             var d = Math.PI / 180, r = this.R, y = latlng.lat * d, tmp = this.R_MINOR / r, e = Math.sqrt(1 - tmp * tmp), con = e * Math.sin(y);
             var ts = Math.tan(Math.PI / 4 - y / 2) / Math.pow((1 - con) / (1 + con), e / 2);
             y = -r * Math.log(Math.max(ts, 1e-10));
-            return new Point2(latlng.lng * d * r, y);
+            return new Point(latlng.lng * d * r, y);
           },
           unproject: function(point) {
             var d = 180 / Math.PI, r = this.R, tmp = this.R_MINOR / r, e = Math.sqrt(1 - tmp * tmp), ts = Math.exp(-point.y / r), phi = Math.PI / 2 - 2 * Math.atan(ts);
@@ -4496,11 +4514,11 @@
             return this._map.getPane(name ? this.options[name] || name : this.options.pane);
           },
           addInteractiveTarget: function(targetEl) {
-            this._map._targets[stamp2(targetEl)] = this;
+            this._map._targets[stamp(targetEl)] = this;
             return this;
           },
           removeInteractiveTarget: function(targetEl) {
-            delete this._map._targets[stamp2(targetEl)];
+            delete this._map._targets[stamp(targetEl)];
             return this;
           },
           // @method getAttribution: String
@@ -4534,7 +4552,7 @@
             if (!layer._layerAdd) {
               throw new Error("The provided object is not a Layer.");
             }
-            var id = stamp2(layer);
+            var id = stamp(layer);
             if (this._layers[id]) {
               return this;
             }
@@ -4549,7 +4567,7 @@
           // @method removeLayer(layer: Layer): this
           // Removes the given layer from the map.
           removeLayer: function(layer) {
-            var id = stamp2(layer);
+            var id = stamp(layer);
             if (!this._layers[id]) {
               return this;
             }
@@ -4567,7 +4585,7 @@
           // @method hasLayer(layer: Layer): Boolean
           // Returns `true` if the given layer is currently added to the map
           hasLayer: function(layer) {
-            return stamp2(layer) in this._layers;
+            return stamp(layer) in this._layers;
           },
           /* @method eachLayer(fn: Function, context?: Object): this
            * Iterates over the layers of the map, optionally specifying context of the iterator function.
@@ -4584,19 +4602,19 @@
             return this;
           },
           _addLayers: function(layers2) {
-            layers2 = layers2 ? isArray2(layers2) ? layers2 : [layers2] : [];
+            layers2 = layers2 ? isArray(layers2) ? layers2 : [layers2] : [];
             for (var i = 0, len = layers2.length; i < len; i++) {
               this.addLayer(layers2[i]);
             }
           },
           _addZoomLimit: function(layer) {
             if (!isNaN(layer.options.maxZoom) || !isNaN(layer.options.minZoom)) {
-              this._zoomBoundLayers[stamp2(layer)] = layer;
+              this._zoomBoundLayers[stamp(layer)] = layer;
               this._updateZoomLevels();
             }
           },
           _removeZoomLimit: function(layer) {
-            var id = stamp2(layer);
+            var id = stamp(layer);
             if (this._zoomBoundLayers[id]) {
               delete this._zoomBoundLayers[id];
               this._updateZoomLevels();
@@ -4723,7 +4741,7 @@
           // @method getLayerId(layer: Layer): Number
           // Returns the internal ID for a layer
           getLayerId: function(layer) {
-            return stamp2(layer);
+            return stamp(layer);
           }
         });
         var layerGroup = function(layers2, options) {
@@ -4751,8 +4769,8 @@
           },
           // @method setStyle(style: Path options): this
           // Sets the given path options to each layer of the group that has a `setStyle` method.
-          setStyle: function(style3) {
-            return this.invoke("setStyle", style3);
+          setStyle: function(style2) {
+            return this.invoke("setStyle", style2);
           },
           // @method bringToFront(): this
           // Brings the layer group to the top of all other layers
@@ -4862,7 +4880,7 @@
             if (typeof sizeOption === "number") {
               sizeOption = [sizeOption, sizeOption];
             }
-            var size = toPoint2(sizeOption), anchor = toPoint2(name === "shadow" && options.shadowAnchor || options.iconAnchor || size && size.divideBy(2, true));
+            var size = toPoint(sizeOption), anchor = toPoint(name === "shadow" && options.shadowAnchor || options.iconAnchor || size && size.divideBy(2, true));
             img.className = "leaflet-marker-" + name + " " + (options.className || "");
             if (anchor) {
               img.style.marginLeft = -anchor.x + "px";
@@ -4963,7 +4981,7 @@
               bounds.max._subtract(origin).subtract(padding)
             );
             if (!panBounds.contains(iconPos)) {
-              var movement = toPoint2(
+              var movement = toPoint(
                 (Math.max(panBounds.max.x, iconPos.x) - panBounds.max.x) / (bounds.max.x - panBounds.max.x) - (Math.min(panBounds.min.x, iconPos.x) - panBounds.min.x) / (bounds.min.x - panBounds.min.x),
                 (Math.max(panBounds.max.y, iconPos.y) - panBounds.max.y) / (bounds.max.y - panBounds.max.y) - (Math.min(panBounds.min.y, iconPos.y) - panBounds.min.y) / (bounds.min.y - panBounds.min.y)
               ).multiplyBy(speed);
@@ -5175,7 +5193,7 @@
               });
             }
             if (this.options.autoPanOnFocus) {
-              on2(icon2, "focus", this._panOnFocus, this);
+              on(icon2, "focus", this._panOnFocus, this);
             }
             var newShadow = options.icon.createShadow(this._shadow), addShadow = false;
             if (newShadow !== this._shadow) {
@@ -5206,7 +5224,7 @@
               });
             }
             if (this.options.autoPanOnFocus) {
-              off2(this._icon, "focus", this._panOnFocus, this);
+              off(this._icon, "focus", this._panOnFocus, this);
             }
             remove(this._icon);
             this.removeInteractiveTarget(this._icon);
@@ -5285,8 +5303,8 @@
               return;
             }
             var iconOpts = this.options.icon.options;
-            var size = iconOpts.iconSize ? toPoint2(iconOpts.iconSize) : toPoint2(0, 0);
-            var anchor = iconOpts.iconAnchor ? toPoint2(iconOpts.iconAnchor) : toPoint2(0, 0);
+            var size = iconOpts.iconSize ? toPoint(iconOpts.iconSize) : toPoint(0, 0);
+            var anchor = iconOpts.iconAnchor ? toPoint(iconOpts.iconAnchor) : toPoint(0, 0);
             map.panInside(this._latlng, {
               paddingTopLeft: anchor,
               paddingBottomRight: size.subtract(anchor)
@@ -5371,11 +5389,11 @@
           },
           // @method setStyle(style: Path options): this
           // Changes the appearance of a Path based on the options in the `Path options` object.
-          setStyle: function(style3) {
-            setOptions(this, style3);
+          setStyle: function(style2) {
+            setOptions(this, style2);
             if (this._renderer) {
               this._renderer._updateStyle(this);
-              if (this.options.stroke && style3 && Object.prototype.hasOwnProperty.call(style3, "weight")) {
+              if (this.options.stroke && style2 && Object.prototype.hasOwnProperty.call(style2, "weight")) {
                 this._updateBounds();
               }
             }
@@ -5640,7 +5658,7 @@
             }
           },
           _updateBounds: function() {
-            var w = this._clickTolerance(), p = new Point2(w, w);
+            var w = this._clickTolerance(), p = new Point(w, w);
             if (!this._rawPxBounds) {
               return;
             }
@@ -5767,7 +5785,7 @@
             return isFlat(this._latlngs[0]) ? this._latlngs[0] : this._latlngs[0][0];
           },
           _clipPoints: function() {
-            var bounds = this._renderer._bounds, w = this.options.weight, p = new Point2(w, w);
+            var bounds = this._renderer._bounds, w = this.options.weight, p = new Point(w, w);
             bounds = new Bounds(bounds.min.subtract(p), bounds.max.add(p));
             this._parts = [];
             if (!this._pxBounds || !this._pxBounds.intersects(bounds)) {
@@ -5869,7 +5887,7 @@
           // @method addData( <GeoJSON> data ): this
           // Adds a GeoJSON object to the layer.
           addData: function(geojson) {
-            var features = isArray2(geojson) ? geojson : geojson.features, i, len, feature;
+            var features = isArray(geojson) ? geojson : geojson.features, i, len, feature;
             if (features) {
               for (i = 0, len = features.length; i < len; i++) {
                 feature = features[i];
@@ -5908,17 +5926,17 @@
           },
           // @method setStyle( <Function> style ): this
           // Changes styles of GeoJSON vector layers with the given style function.
-          setStyle: function(style3) {
+          setStyle: function(style2) {
             return this.eachLayer(function(layer) {
-              this._setLayerStyle(layer, style3);
+              this._setLayerStyle(layer, style2);
             }, this);
           },
-          _setLayerStyle: function(layer, style3) {
+          _setLayerStyle: function(layer, style2) {
             if (layer.setStyle) {
-              if (typeof style3 === "function") {
-                style3 = style3(layer.feature);
+              if (typeof style2 === "function") {
+                style2 = style2(layer.feature);
               }
-              layer.setStyle(style3);
+              layer.setStyle(style2);
             }
           }
         });
@@ -5985,7 +6003,7 @@
         }
         function latLngToCoords(latlng, precision) {
           latlng = toLatLng(latlng);
-          return latlng.alt !== void 0 ? [formatNum2(latlng.lng, precision), formatNum2(latlng.lat, precision), formatNum2(latlng.alt, precision)] : [formatNum2(latlng.lng, precision), formatNum2(latlng.lat, precision)];
+          return latlng.alt !== void 0 ? [formatNum(latlng.lng, precision), formatNum(latlng.lat, precision), formatNum(latlng.alt, precision)] : [formatNum(latlng.lng, precision), formatNum(latlng.lat, precision)];
         }
         function latLngsToCoords(latlngs, levelsDeep, closed, precision) {
           var coords = [];
@@ -6235,8 +6253,8 @@
             if (this.options.className) {
               addClass(img, this.options.className);
             }
-            img.onselectstart = falseFn2;
-            img.onmousemove = falseFn2;
+            img.onselectstart = falseFn;
+            img.onmousemove = falseFn;
             img.onload = bind(this.fire, this, "load");
             img.onerror = bind(this._overlayOnError, this, "error");
             if (this.options.crossOrigin || this.options.crossOrigin === "") {
@@ -6322,8 +6340,8 @@
             if (this.options.className) {
               addClass(vid, this.options.className);
             }
-            vid.onselectstart = falseFn2;
-            vid.onmousemove = falseFn2;
+            vid.onselectstart = falseFn;
+            vid.onmousemove = falseFn;
             vid.onloadeddata = bind(this.fire, this, "load");
             if (wasElementSupplied) {
               var sourceElements = vid.getElementsByTagName("source");
@@ -6334,7 +6352,7 @@
               this._url = sourceElements.length > 0 ? sources : [vid.src];
               return;
             }
-            if (!isArray2(this._url)) {
+            if (!isArray(this._url)) {
               this._url = [this._url];
             }
             if (!this.options.keepAspectRatio && Object.prototype.hasOwnProperty.call(vid.style, "objectFit")) {
@@ -6367,8 +6385,8 @@
             if (this.options.className) {
               addClass(el, this.options.className);
             }
-            el.onselectstart = falseFn2;
-            el.onmousemove = falseFn2;
+            el.onselectstart = falseFn;
+            el.onmousemove = falseFn;
           }
           // @method getElement(): SVGElement
           // Returns the instance of [`SVGElement`](https://developer.mozilla.org/docs/Web/API/SVGElement)
@@ -6399,7 +6417,7 @@
             content: ""
           },
           initialize: function(options, source) {
-            if (options && (options instanceof LatLng2 || isArray2(options))) {
+            if (options && (options instanceof LatLng2 || isArray(options))) {
               this._latlng = toLatLng(options);
               setOptions(this, source);
             } else {
@@ -6615,7 +6633,7 @@
             if (!this._map) {
               return;
             }
-            var pos = this._map.latLngToLayerPoint(this._latlng), offset = toPoint2(this.options.offset), anchor = this._getAnchor();
+            var pos = this._map.latLngToLayerPoint(this._latlng), offset = toPoint(this.options.offset), anchor = this._getAnchor();
             if (this._zoomAnimated) {
               setPosition(this._container, pos.add(anchor));
             } else {
@@ -6764,7 +6782,7 @@
             this._contentNode = create$1("div", prefix + "-content", wrapper);
             disableClickPropagation(container);
             disableScrollPropagation(this._contentNode);
-            on2(container, "contextmenu", stopPropagation);
+            on(container, "contextmenu", stopPropagation);
             this._tipContainer = create$1("div", prefix + "-tip-container", container);
             this._tip = create$1("div", prefix + "-tip", this._tipContainer);
             if (this.options.closeButton) {
@@ -6773,25 +6791,25 @@
               closeButton.setAttribute("aria-label", "Close popup");
               closeButton.href = "#close";
               closeButton.innerHTML = '<span aria-hidden="true">&#215;</span>';
-              on2(closeButton, "click", function(ev) {
-                preventDefault2(ev);
+              on(closeButton, "click", function(ev) {
+                preventDefault(ev);
                 this.close();
               }, this);
             }
           },
           _updateLayout: function() {
-            var container = this._contentNode, style3 = container.style;
-            style3.width = "";
-            style3.whiteSpace = "nowrap";
+            var container = this._contentNode, style2 = container.style;
+            style2.width = "";
+            style2.whiteSpace = "nowrap";
             var width = container.offsetWidth;
             width = Math.min(width, this.options.maxWidth);
             width = Math.max(width, this.options.minWidth);
-            style3.width = width + 1 + "px";
-            style3.whiteSpace = "";
-            style3.height = "";
+            style2.width = width + 1 + "px";
+            style2.whiteSpace = "";
+            style2.height = "";
             var height = container.offsetHeight, maxHeight = this.options.maxHeight, scrolledClass = "leaflet-popup-scrolled";
             if (maxHeight && height > maxHeight) {
-              style3.height = maxHeight + "px";
+              style2.height = maxHeight + "px";
               addClass(container, scrolledClass);
             } else {
               removeClass(container, scrolledClass);
@@ -6813,9 +6831,9 @@
               this._autopanning = false;
               return;
             }
-            var map = this._map, marginBottom = parseInt(getStyle(this._container, "marginBottom"), 10) || 0, containerHeight = this._container.offsetHeight + marginBottom, containerWidth = this._containerWidth, layerPos = new Point2(this._containerLeft, -containerHeight - this._containerBottom);
+            var map = this._map, marginBottom = parseInt(getStyle(this._container, "marginBottom"), 10) || 0, containerHeight = this._container.offsetHeight + marginBottom, containerWidth = this._containerWidth, layerPos = new Point(this._containerLeft, -containerHeight - this._containerBottom);
             layerPos._add(getPosition(this._container));
-            var containerPos = map.layerPointToContainerPoint(layerPos), padding = toPoint2(this.options.autoPanPadding), paddingTL = toPoint2(this.options.autoPanPaddingTopLeft || padding), paddingBR = toPoint2(this.options.autoPanPaddingBottomRight || padding), size = map.getSize(), dx = 0, dy = 0;
+            var containerPos = map.layerPointToContainerPoint(layerPos), padding = toPoint(this.options.autoPanPadding), paddingTL = toPoint(this.options.autoPanPaddingTopLeft || padding), paddingBR = toPoint(this.options.autoPanPaddingBottomRight || padding), size = map.getSize(), dx = 0, dy = 0;
             if (containerPos.x + containerWidth + paddingBR.x > size.x) {
               dx = containerPos.x + containerWidth - size.x + paddingBR.x;
             }
@@ -6836,7 +6854,7 @@
             }
           },
           _getAnchor: function() {
-            return toPoint2(this._source && this._source._getPopupAnchor ? this._source._getPopupAnchor() : [0, 0]);
+            return toPoint(this._source && this._source._getPopupAnchor ? this._source._getPopupAnchor() : [0, 0]);
           }
         });
         var popup = function(options, source) {
@@ -7025,14 +7043,14 @@
             var prefix = "leaflet-tooltip", className = prefix + " " + (this.options.className || "") + " leaflet-zoom-" + (this._zoomAnimated ? "animated" : "hide");
             this._contentNode = this._container = create$1("div", className);
             this._container.setAttribute("role", "tooltip");
-            this._container.setAttribute("id", "leaflet-tooltip-" + stamp2(this));
+            this._container.setAttribute("id", "leaflet-tooltip-" + stamp(this));
           },
           _updateLayout: function() {
           },
           _adjustPan: function() {
           },
           _setPosition: function(pos) {
-            var subX, subY, map = this._map, container = this._container, centerPoint = map.latLngToContainerPoint(map.getCenter()), tooltipPoint = map.layerPointToContainerPoint(pos), direction = this.options.direction, tooltipWidth = container.offsetWidth, tooltipHeight = container.offsetHeight, offset = toPoint2(this.options.offset), anchor = this._getAnchor();
+            var subX, subY, map = this._map, container = this._container, centerPoint = map.latLngToContainerPoint(map.getCenter()), tooltipPoint = map.layerPointToContainerPoint(pos), direction = this.options.direction, tooltipWidth = container.offsetWidth, tooltipHeight = container.offsetHeight, offset = toPoint(this.options.offset), anchor = this._getAnchor();
             if (direction === "top") {
               subX = tooltipWidth / 2;
               subY = tooltipHeight;
@@ -7057,7 +7075,7 @@
               subX = tooltipWidth + (offset.x + anchor.x) * 2;
               subY = tooltipHeight / 2;
             }
-            pos = pos.subtract(toPoint2(subX, subY, true)).add(offset).add(anchor);
+            pos = pos.subtract(toPoint(subX, subY, true)).add(offset).add(anchor);
             removeClass(container, "leaflet-tooltip-right");
             removeClass(container, "leaflet-tooltip-left");
             removeClass(container, "leaflet-tooltip-top");
@@ -7080,7 +7098,7 @@
             this._setPosition(pos);
           },
           _getAnchor: function() {
-            return toPoint2(this._source && this._source._getTooltipAnchor && !this.options.sticky ? this._source._getTooltipAnchor() : [0, 0]);
+            return toPoint(this._source && this._source._getTooltipAnchor && !this.options.sticky ? this._source._getTooltipAnchor() : [0, 0]);
           }
         });
         var tooltip = function(options, source) {
@@ -7216,11 +7234,11 @@
           _addFocusListenersOnLayer: function(layer) {
             var el = typeof layer.getElement === "function" && layer.getElement();
             if (el) {
-              on2(el, "focus", function() {
+              on(el, "focus", function() {
                 this._tooltip._source = layer;
                 this.openTooltip();
               }, this);
-              on2(el, "blur", this.closeTooltip, this);
+              on(el, "blur", this.closeTooltip, this);
             }
           },
           _setAriaDescribedByOnLayer: function(layer) {
@@ -7281,7 +7299,7 @@
               div.innerHTML = options.html !== false ? options.html : "";
             }
             if (options.bgPos) {
-              var bgPos = toPoint2(options.bgPos);
+              var bgPos = toPoint(options.bgPos);
               div.style.backgroundPosition = -bgPos.x + "px " + -bgPos.y + "px";
             }
             this._setIconStyles(div, "icon");
@@ -7463,7 +7481,7 @@
           // Normalizes the [tileSize option](#gridlayer-tilesize) into a point. Used by the `createTile()` method.
           getTileSize: function() {
             var s = this.options.tileSize;
-            return s instanceof Point2 ? s : new Point2(s, s);
+            return s instanceof Point ? s : new Point(s, s);
           },
           _updateZIndex: function() {
             if (this._container && this.options.zIndex !== void 0 && this.options.zIndex !== null) {
@@ -7518,7 +7536,7 @@
               this._fadeFrame = requestAnimFrame(this._updateOpacity, this);
             }
           },
-          _onOpaqueTile: falseFn2,
+          _onOpaqueTile: falseFn,
           _initContainer: function() {
             if (this._container) {
               return;
@@ -7555,15 +7573,15 @@
               level.origin = map.project(map.unproject(map.getPixelOrigin()), zoom2).round();
               level.zoom = zoom2;
               this._setZoomTransform(level, map.getCenter(), map.getZoom());
-              falseFn2(level.el.offsetWidth);
+              falseFn(level.el.offsetWidth);
               this._onCreateLevel(level);
             }
             this._level = level;
             return level;
           },
-          _onUpdateLevel: falseFn2,
-          _onRemoveLevel: falseFn2,
-          _onCreateLevel: falseFn2,
+          _onUpdateLevel: falseFn,
+          _onRemoveLevel: falseFn,
+          _onCreateLevel: falseFn,
           _pruneTiles: function() {
             if (!this._map) {
               return;
@@ -7616,7 +7634,7 @@
             this._tileZoom = void 0;
           },
           _retainParent: function(x, y, z, minZoom) {
-            var x2 = Math.floor(x / 2), y2 = Math.floor(y / 2), z2 = z - 1, coords2 = new Point2(+x2, +y2);
+            var x2 = Math.floor(x / 2), y2 = Math.floor(y / 2), z2 = z - 1, coords2 = new Point(+x2, +y2);
             coords2.z = +z2;
             var key = this._tileCoordsToKey(coords2), tile = this._tiles[key];
             if (tile && tile.active) {
@@ -7633,7 +7651,7 @@
           _retainChildren: function(x, y, z, maxZoom) {
             for (var i = 2 * x; i < 2 * x + 2; i++) {
               for (var j = 2 * y; j < 2 * y + 2; j++) {
-                var coords = new Point2(i, j);
+                var coords = new Point(i, j);
                 coords.z = z + 1;
                 var key = this._tileCoordsToKey(coords), tile = this._tiles[key];
                 if (tile && tile.active) {
@@ -7750,7 +7768,7 @@
             }
             for (var key in this._tiles) {
               var c = this._tiles[key].coords;
-              if (c.z !== this._tileZoom || !noPruneRange.contains(new Point2(c.x, c.y))) {
+              if (c.z !== this._tileZoom || !noPruneRange.contains(new Point(c.x, c.y))) {
                 this._tiles[key].current = false;
               }
             }
@@ -7760,7 +7778,7 @@
             }
             for (var j = tileRange.min.y; j <= tileRange.max.y; j++) {
               for (var i = tileRange.min.x; i <= tileRange.max.x; i++) {
-                var coords = new Point2(i, j);
+                var coords = new Point(i, j);
                 coords.z = this._tileZoom;
                 if (!this._isValidTile(coords)) {
                   continue;
@@ -7823,7 +7841,7 @@
           },
           // converts tile cache key to coordinates
           _keyToTileCoords: function(key) {
-            var k = key.split(":"), coords = new Point2(+k[0], +k[1]);
+            var k = key.split(":"), coords = new Point(+k[0], +k[1]);
             coords.z = +k[2];
             return coords;
           },
@@ -7844,8 +7862,8 @@
             var tileSize = this.getTileSize();
             tile.style.width = tileSize.x + "px";
             tile.style.height = tileSize.y + "px";
-            tile.onselectstart = falseFn2;
-            tile.onmousemove = falseFn2;
+            tile.onselectstart = falseFn;
+            tile.onmousemove = falseFn;
             if (Browser.ielt9 && this.options.opacity < 1) {
               setOpacity(tile, this.options.opacity);
             }
@@ -7912,7 +7930,7 @@
             return coords.scaleBy(this.getTileSize()).subtract(this._level.origin);
           },
           _wrapCoords: function(coords) {
-            var newCoords = new Point2(
+            var newCoords = new Point(
               this._wrapX ? wrapNum(coords.x, this._wrapX) : coords.x,
               this._wrapY ? wrapNum(coords.y, this._wrapY) : coords.y
             );
@@ -8022,8 +8040,8 @@
           // callback is called when the tile has been loaded.
           createTile: function(coords, done) {
             var tile = document.createElement("img");
-            on2(tile, "load", bind(this._tileOnLoad, this, done, tile));
-            on2(tile, "error", bind(this._tileOnError, this, done, tile));
+            on(tile, "load", bind(this._tileOnLoad, this, done, tile));
+            on(tile, "error", bind(this._tileOnError, this, done, tile));
             if (this.options.crossOrigin || this.options.crossOrigin === "") {
               tile.crossOrigin = this.options.crossOrigin === true ? "" : this.options.crossOrigin;
             }
@@ -8091,8 +8109,8 @@
             for (i in this._tiles) {
               if (this._tiles[i].coords.z !== this._tileZoom) {
                 tile = this._tiles[i].el;
-                tile.onload = falseFn2;
-                tile.onerror = falseFn2;
+                tile.onload = falseFn;
+                tile.onerror = falseFn;
                 if (!tile.complete) {
                   tile.src = emptyImageUrl;
                   var coords = this._tiles[i].coords;
@@ -8210,7 +8228,7 @@
           },
           initialize: function(options) {
             setOptions(this, options);
-            stamp2(this);
+            stamp(this);
             this._layers = this._layers || {};
           },
           onAdd: function() {
@@ -8298,9 +8316,9 @@
           },
           _initContainer: function() {
             var container = this._container = document.createElement("canvas");
-            on2(container, "mousemove", this._onMouseMove, this);
-            on2(container, "click dblclick mousedown mouseup contextmenu", this._onClick, this);
-            on2(container, "mouseout", this._handleMouseOut, this);
+            on(container, "mousemove", this._onMouseMove, this);
+            on(container, "click dblclick mousedown mouseup contextmenu", this._onClick, this);
+            on(container, "mouseout", this._handleMouseOut, this);
             container["_leaflet_disable_events"] = true;
             this._ctx = container.getContext("2d");
           },
@@ -8308,7 +8326,7 @@
             cancelAnimFrame(this._redrawRequest);
             delete this._ctx;
             remove(this._container);
-            off2(this._container);
+            off(this._container);
             delete this._container;
           },
           _updatePaths: function() {
@@ -8349,7 +8367,7 @@
           },
           _initPath: function(layer) {
             this._updateDashArray(layer);
-            this._layers[stamp2(layer)] = layer;
+            this._layers[stamp(layer)] = layer;
             var order = layer._order = {
               layer,
               prev: this._drawLast,
@@ -8379,7 +8397,7 @@
               this._drawFirst = next;
             }
             delete layer._order;
-            delete this._layers[stamp2(layer)];
+            delete this._layers[stamp(layer)];
             this._requestRedraw(layer);
           },
           _updatePath: function(layer) {
@@ -8623,7 +8641,7 @@
             this._requestRedraw(layer);
           }
         });
-        function canvas2(options) {
+        function canvas(options) {
           return Browser.canvas ? new Canvas(options) : null;
         }
         var vmlCreate = function() {
@@ -8656,7 +8674,7 @@
             layer._path = vmlCreate("path");
             container.appendChild(layer._path);
             this._updateStyle(layer);
-            this._layers[stamp2(layer)] = layer;
+            this._layers[stamp(layer)] = layer;
           },
           _addPath: function(layer) {
             var container = layer._container;
@@ -8669,7 +8687,7 @@
             var container = layer._container;
             remove(container);
             layer.removeInteractiveTarget(container);
-            delete this._layers[stamp2(layer)];
+            delete this._layers[stamp(layer)];
           },
           _updateStyle: function(layer) {
             var stroke = layer._stroke, fill = layer._fill, options = layer.options, container = layer._container;
@@ -8684,7 +8702,7 @@
               stroke.color = options.color;
               stroke.opacity = options.opacity;
               if (options.dashArray) {
-                stroke.dashStyle = isArray2(options.dashArray) ? options.dashArray.join(" ") : options.dashArray.replace(/( *, *)/g, " ");
+                stroke.dashStyle = isArray(options.dashArray) ? options.dashArray.join(" ") : options.dashArray.replace(/( *, *)/g, " ");
               } else {
                 stroke.dashStyle = "";
               }
@@ -8720,17 +8738,17 @@
             toBack(layer._container);
           }
         };
-        var create2 = Browser.vml ? vmlCreate : svgCreate2;
+        var create = Browser.vml ? vmlCreate : svgCreate;
         var SVG = Renderer.extend({
           _initContainer: function() {
-            this._container = create2("svg");
+            this._container = create("svg");
             this._container.setAttribute("pointer-events", "none");
-            this._rootGroup = create2("g");
+            this._rootGroup = create("g");
             this._container.appendChild(this._rootGroup);
           },
           _destroyContainer: function() {
             remove(this._container);
-            off2(this._container);
+            off(this._container);
             delete this._container;
             delete this._rootGroup;
             delete this._svgSize;
@@ -8752,7 +8770,7 @@
           },
           // methods below are called by vector layers implementations
           _initPath: function(layer) {
-            var path = layer._path = create2("path");
+            var path = layer._path = create("path");
             if (layer.options.className) {
               addClass(path, layer.options.className);
             }
@@ -8760,7 +8778,7 @@
               addClass(path, "leaflet-interactive");
             }
             this._updateStyle(layer);
-            this._layers[stamp2(layer)] = layer;
+            this._layers[stamp(layer)] = layer;
           },
           _addPath: function(layer) {
             if (!this._rootGroup) {
@@ -8772,7 +8790,7 @@
           _removePath: function(layer) {
             remove(layer._path);
             layer.removeInteractiveTarget(layer._path);
-            delete this._layers[stamp2(layer)];
+            delete this._layers[stamp(layer)];
           },
           _updatePath: function(layer) {
             layer._project();
@@ -8832,7 +8850,7 @@
         if (Browser.vml) {
           SVG.include(vmlMixin);
         }
-        function svg2(options) {
+        function svg(options) {
           return Browser.svg || Browser.vml ? new SVG(options) : null;
         }
         Map.include({
@@ -8862,7 +8880,7 @@
             return renderer;
           },
           _createRenderer: function(options) {
-            return this.options.preferCanvas && canvas2(options) || svg2(options);
+            return this.options.preferCanvas && canvas(options) || svg(options);
           }
         });
         var Rectangle = Polygon.extend({
@@ -8887,7 +8905,7 @@
         function rectangle(latLngBounds, options) {
           return new Rectangle(latLngBounds, options);
         }
-        SVG.create = create2;
+        SVG.create = create;
         SVG.pointsToPath = pointsToPath;
         GeoJSON.geometryToLayer = geometryToLayer;
         GeoJSON.coordsToLatLng = coordsToLatLng;
@@ -8911,10 +8929,10 @@
             map.on("unload", this._destroy, this);
           },
           addHooks: function() {
-            on2(this._container, "mousedown", this._onMouseDown, this);
+            on(this._container, "mousedown", this._onMouseDown, this);
           },
           removeHooks: function() {
-            off2(this._container, "mousedown", this._onMouseDown, this);
+            off(this._container, "mousedown", this._onMouseDown, this);
           },
           moved: function() {
             return this._moved;
@@ -8939,10 +8957,10 @@
             }
             this._clearDeferredResetState();
             this._resetState();
-            disableTextSelection2();
+            disableTextSelection();
             disableImageDrag();
             this._startPoint = this._map.mouseEventToContainerPoint(e);
-            on2(document, {
+            on(document, {
               contextmenu: stop,
               mousemove: this._onMouseMove,
               mouseup: this._onMouseUp,
@@ -8967,9 +8985,9 @@
               remove(this._box);
               removeClass(this._container, "leaflet-crosshair");
             }
-            enableTextSelection2();
+            enableTextSelection();
             enableImageDrag();
-            off2(document, {
+            off(document, {
               contextmenu: stop,
               mousemove: this._onMouseMove,
               mouseup: this._onMouseUp,
@@ -9214,7 +9232,7 @@
             if (container.tabIndex <= 0) {
               container.tabIndex = "0";
             }
-            on2(container, {
+            on(container, {
               focus: this._onFocus,
               blur: this._onBlur,
               mousedown: this._onMouseDown
@@ -9226,7 +9244,7 @@
           },
           removeHooks: function() {
             this._removeHooks();
-            off2(this._map._container, {
+            off(this._map._container, {
               focus: this._onFocus,
               blur: this._onBlur,
               mousedown: this._onMouseDown
@@ -9277,10 +9295,10 @@
             }
           },
           _addHooks: function() {
-            on2(document, "keydown", this._onKeyDown, this);
+            on(document, "keydown", this._onKeyDown, this);
           },
           _removeHooks: function() {
-            off2(document, "keydown", this._onKeyDown, this);
+            off(document, "keydown", this._onKeyDown, this);
           },
           _onKeyDown: function(e) {
             if (e.altKey || e.ctrlKey || e.metaKey) {
@@ -9291,10 +9309,10 @@
               if (!map._panAnim || !map._panAnim._inProgress) {
                 offset = this._panKeys[key];
                 if (e.shiftKey) {
-                  offset = toPoint2(offset).multiplyBy(3);
+                  offset = toPoint(offset).multiplyBy(3);
                 }
                 if (map.options.maxBounds) {
-                  offset = map._limitOffset(toPoint2(offset), map.options.maxBounds);
+                  offset = map._limitOffset(toPoint(offset), map.options.maxBounds);
                 }
                 if (map.options.worldCopyJump) {
                   var newLatLng = map.wrapLatLng(map.unproject(map.project(map.getCenter()).add(offset)));
@@ -9332,11 +9350,11 @@
         });
         var ScrollWheelZoom = Handler.extend({
           addHooks: function() {
-            on2(this._map._container, "wheel", this._onWheelScroll, this);
+            on(this._map._container, "wheel", this._onWheelScroll, this);
             this._delta = 0;
           },
           removeHooks: function() {
-            off2(this._map._container, "wheel", this._onWheelScroll, this);
+            off(this._map._container, "wheel", this._onWheelScroll, this);
           },
           _onWheelScroll: function(e) {
             var delta = getWheelDelta(e);
@@ -9381,10 +9399,10 @@
         });
         var TapHold = Handler.extend({
           addHooks: function() {
-            on2(this._map._container, "touchstart", this._onDown, this);
+            on(this._map._container, "touchstart", this._onDown, this);
           },
           removeHooks: function() {
-            off2(this._map._container, "touchstart", this._onDown, this);
+            off(this._map._container, "touchstart", this._onDown, this);
           },
           _onDown: function(e) {
             clearTimeout(this._holdTimeout);
@@ -9392,31 +9410,31 @@
               return;
             }
             var first = e.touches[0];
-            this._startPos = this._newPos = new Point2(first.clientX, first.clientY);
+            this._startPos = this._newPos = new Point(first.clientX, first.clientY);
             this._holdTimeout = setTimeout(bind(function() {
               this._cancel();
               if (!this._isTapValid()) {
                 return;
               }
-              on2(document, "touchend", preventDefault2);
-              on2(document, "touchend touchcancel", this._cancelClickPrevent);
+              on(document, "touchend", preventDefault);
+              on(document, "touchend touchcancel", this._cancelClickPrevent);
               this._simulateEvent("contextmenu", first);
             }, this), tapHoldDelay);
-            on2(document, "touchend touchcancel contextmenu", this._cancel, this);
-            on2(document, "touchmove", this._onMove, this);
+            on(document, "touchend touchcancel contextmenu", this._cancel, this);
+            on(document, "touchmove", this._onMove, this);
           },
           _cancelClickPrevent: function cancelClickPrevent() {
-            off2(document, "touchend", preventDefault2);
-            off2(document, "touchend touchcancel", cancelClickPrevent);
+            off(document, "touchend", preventDefault);
+            off(document, "touchend touchcancel", cancelClickPrevent);
           },
           _cancel: function() {
             clearTimeout(this._holdTimeout);
-            off2(document, "touchend touchcancel contextmenu", this._cancel, this);
-            off2(document, "touchmove", this._onMove, this);
+            off(document, "touchend touchcancel contextmenu", this._cancel, this);
+            off(document, "touchmove", this._onMove, this);
           },
           _onMove: function(e) {
             var first = e.touches[0];
-            this._newPos = new Point2(first.clientX, first.clientY);
+            this._newPos = new Point(first.clientX, first.clientY);
           },
           _isTapValid: function() {
             return this._newPos.distanceTo(this._startPos) <= this._map.options.tapTolerance;
@@ -9455,11 +9473,11 @@
         var TouchZoom = Handler.extend({
           addHooks: function() {
             addClass(this._map._container, "leaflet-touch-zoom");
-            on2(this._map._container, "touchstart", this._onTouchStart, this);
+            on(this._map._container, "touchstart", this._onTouchStart, this);
           },
           removeHooks: function() {
             removeClass(this._map._container, "leaflet-touch-zoom");
-            off2(this._map._container, "touchstart", this._onTouchStart, this);
+            off(this._map._container, "touchstart", this._onTouchStart, this);
           },
           _onTouchStart: function(e) {
             var map = this._map;
@@ -9477,9 +9495,9 @@
             this._moved = false;
             this._zooming = true;
             map._stop();
-            on2(document, "touchmove", this._onTouchMove, this);
-            on2(document, "touchend touchcancel", this._onTouchEnd, this);
-            preventDefault2(e);
+            on(document, "touchmove", this._onTouchMove, this);
+            on(document, "touchend touchcancel", this._onTouchEnd, this);
+            preventDefault(e);
           },
           _onTouchMove: function(e) {
             if (!e.touches || e.touches.length !== 2 || !this._zooming) {
@@ -9509,7 +9527,7 @@
             cancelAnimFrame(this._animRequest);
             var moveFn = bind(map._move, map, this._center, this._zoom, { pinch: true, round: false }, void 0);
             this._animRequest = requestAnimFrame(moveFn, this, true);
-            preventDefault2(e);
+            preventDefault(e);
           },
           _onTouchEnd: function() {
             if (!this._moved || !this._zooming) {
@@ -9518,8 +9536,8 @@
             }
             this._zooming = false;
             cancelAnimFrame(this._animRequest);
-            off2(document, "touchmove", this._onTouchMove, this);
-            off2(document, "touchend touchcancel", this._onTouchEnd, this);
+            off(document, "touchmove", this._onTouchMove, this);
+            off(document, "touchend touchcancel", this._onTouchEnd, this);
             if (this._map.options.zoomAnimation) {
               this._map._animateZoom(this._center, this._map._limitZoom(this._zoom), true, this._map.options.zoomSnap);
             } else {
@@ -9564,7 +9582,7 @@
         exports2.Marker = Marker;
         exports2.Mixin = Mixin;
         exports2.Path = Path;
-        exports2.Point = Point2;
+        exports2.Point = Point;
         exports2.PolyUtil = PolyUtil;
         exports2.Polygon = Polygon;
         exports2.Polyline = Polyline;
@@ -9582,7 +9600,7 @@
         exports2.VideoOverlay = VideoOverlay;
         exports2.bind = bind;
         exports2.bounds = toBounds;
-        exports2.canvas = canvas2;
+        exports2.canvas = canvas;
         exports2.circle = circle;
         exports2.circleMarker = circleMarker;
         exports2.control = control;
@@ -9599,14 +9617,14 @@
         exports2.layerGroup = layerGroup;
         exports2.map = createMap;
         exports2.marker = marker;
-        exports2.point = toPoint2;
+        exports2.point = toPoint;
         exports2.polygon = polygon;
         exports2.polyline = polyline;
         exports2.popup = popup;
         exports2.rectangle = rectangle;
         exports2.setOptions = setOptions;
-        exports2.stamp = stamp2;
-        exports2.svg = svg2;
+        exports2.stamp = stamp;
+        exports2.svg = svg;
         exports2.svgOverlay = svgOverlay;
         exports2.tileLayer = tileLayer;
         exports2.tooltip = tooltip;
@@ -10968,8 +10986,8 @@
         };
         L.DistanceGrid.prototype = {
           addObject: function(obj, point) {
-            var x = this._getCoord(point.x), y = this._getCoord(point.y), grid = this._grid, row = grid[y] = grid[y] || {}, cell = row[x] = row[x] || [], stamp2 = L.Util.stamp(obj);
-            this._objectPoint[stamp2] = point;
+            var x = this._getCoord(point.x), y = this._getCoord(point.y), grid = this._grid, row = grid[y] = grid[y] || {}, cell = row[x] = row[x] || [], stamp = L.Util.stamp(obj);
+            this._objectPoint[stamp] = point;
             cell.push(obj);
           },
           updateObject: function(obj, point) {
@@ -11262,11 +11280,11 @@
         });
         L.MarkerCluster.include({
           _animationSpiderfy: function(childMarkers, positions) {
-            var me = this, group = this._group, map = group._map, fg = group._featureGroup, thisLayerLatLng = this._latlng, thisLayerPos = map.latLngToLayerPoint(thisLayerLatLng), svg2 = L.Path.SVG, legOptions = L.extend({}, this._group.options.spiderLegPolylineOptions), finalLegOpacity = legOptions.opacity, i, m, leg, legPath, legLength, newPos;
+            var me = this, group = this._group, map = group._map, fg = group._featureGroup, thisLayerLatLng = this._latlng, thisLayerPos = map.latLngToLayerPoint(thisLayerLatLng), svg = L.Path.SVG, legOptions = L.extend({}, this._group.options.spiderLegPolylineOptions), finalLegOpacity = legOptions.opacity, i, m, leg, legPath, legLength, newPos;
             if (finalLegOpacity === void 0) {
               finalLegOpacity = L.MarkerClusterGroup.prototype.options.spiderLegPolylineOptions.opacity;
             }
-            if (svg2) {
+            if (svg) {
               legOptions.opacity = 0;
               legOptions.className = (legOptions.className || "") + " leaflet-cluster-spider-leg";
             } else {
@@ -11279,7 +11297,7 @@
               leg = new L.Polyline([thisLayerLatLng, newPos], legOptions);
               map.addLayer(leg);
               m._spiderLeg = leg;
-              if (svg2) {
+              if (svg) {
                 legPath = leg._path;
                 legLength = legPath.getTotalLength() + 0.1;
                 legPath.style.strokeDasharray = legLength;
@@ -11306,7 +11324,7 @@
               if (m.clusterShow) {
                 m.clusterShow();
               }
-              if (svg2) {
+              if (svg) {
                 leg = m._spiderLeg;
                 legPath = leg._path;
                 legPath.style.strokeDashoffset = 0;
@@ -11324,7 +11342,7 @@
             }, 200);
           },
           _animationUnspiderfy: function(zoomDetails) {
-            var me = this, group = this._group, map = group._map, fg = group._featureGroup, thisLayerPos = zoomDetails ? map._latLngToNewLayerPoint(this._latlng, zoomDetails.zoom, zoomDetails.center) : map.latLngToLayerPoint(this._latlng), childMarkers = this.getAllChildMarkers(null, true), svg2 = L.Path.SVG, m, i, leg, legPath, legLength, nonAnimatable;
+            var me = this, group = this._group, map = group._map, fg = group._featureGroup, thisLayerPos = zoomDetails ? map._latLngToNewLayerPoint(this._latlng, zoomDetails.zoom, zoomDetails.center) : map.latLngToLayerPoint(this._latlng), childMarkers = this.getAllChildMarkers(null, true), svg = L.Path.SVG, m, i, leg, legPath, legLength, nonAnimatable;
             group._ignoreMove = true;
             group._animationStart();
             this.setOpacity(1);
@@ -11348,7 +11366,7 @@
               if (nonAnimatable) {
                 fg.removeLayer(m);
               }
-              if (svg2) {
+              if (svg) {
                 leg = m._spiderLeg;
                 legPath = leg._path;
                 legLength = legPath.getTotalLength() + 0.1;
@@ -13254,699 +13272,11 @@
     }
   });
 
-  // node_modules/leaflet/src/core/Util.js
-  function stamp(obj) {
-    if (!("_leaflet_id" in obj)) {
-      obj["_leaflet_id"] = ++lastId;
-    }
-    return obj._leaflet_id;
-  }
-  function falseFn() {
-    return false;
-  }
-  function formatNum(num, precision) {
-    if (precision === false) {
-      return num;
-    }
-    var pow = Math.pow(10, precision === void 0 ? 6 : precision);
-    return Math.round(num * pow) / pow;
-  }
-  function trim(str) {
-    return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, "");
-  }
-  function splitWords(str) {
-    return trim(str).split(/\s+/);
-  }
-  function indexOf(array, el) {
-    for (var i = 0; i < array.length; i++) {
-      if (array[i] === el) {
-        return i;
-      }
-    }
-    return -1;
-  }
-  function getPrefixed(name) {
-    return window["webkit" + name] || window["moz" + name] || window["ms" + name];
-  }
-  function timeoutDefer(fn) {
-    var time = +/* @__PURE__ */ new Date(), timeToCall = Math.max(0, 16 - (time - lastTime));
-    lastTime = time + timeToCall;
-    return window.setTimeout(fn, timeToCall);
-  }
-  var create, lastId, isArray, lastTime, requestFn, cancelFn;
-  var init_Util = __esm({
-    "node_modules/leaflet/src/core/Util.js"() {
-      create = Object.create || function() {
-        function F() {
-        }
-        return function(proto) {
-          F.prototype = proto;
-          return new F();
-        };
-      }();
-      lastId = 0;
-      isArray = Array.isArray || function(obj) {
-        return Object.prototype.toString.call(obj) === "[object Array]";
-      };
-      lastTime = 0;
-      requestFn = window.requestAnimationFrame || getPrefixed("RequestAnimationFrame") || timeoutDefer;
-      cancelFn = window.cancelAnimationFrame || getPrefixed("CancelAnimationFrame") || getPrefixed("CancelRequestAnimationFrame") || function(id) {
-        window.clearTimeout(id);
-      };
-    }
-  });
-
-  // node_modules/leaflet/src/geometry/Point.js
-  function Point(x, y, round) {
-    this.x = round ? Math.round(x) : x;
-    this.y = round ? Math.round(y) : y;
-  }
-  function toPoint(x, y, round) {
-    if (x instanceof Point) {
-      return x;
-    }
-    if (isArray(x)) {
-      return new Point(x[0], x[1]);
-    }
-    if (x === void 0 || x === null) {
-      return x;
-    }
-    if (typeof x === "object" && "x" in x && "y" in x) {
-      return new Point(x.x, x.y);
-    }
-    return new Point(x, y, round);
-  }
-  var trunc;
-  var init_Point = __esm({
-    "node_modules/leaflet/src/geometry/Point.js"() {
-      init_Util();
-      trunc = Math.trunc || function(v) {
-        return v > 0 ? Math.floor(v) : Math.ceil(v);
-      };
-      Point.prototype = {
-        // @method clone(): Point
-        // Returns a copy of the current point.
-        clone: function() {
-          return new Point(this.x, this.y);
-        },
-        // @method add(otherPoint: Point): Point
-        // Returns the result of addition of the current and the given points.
-        add: function(point) {
-          return this.clone()._add(toPoint(point));
-        },
-        _add: function(point) {
-          this.x += point.x;
-          this.y += point.y;
-          return this;
-        },
-        // @method subtract(otherPoint: Point): Point
-        // Returns the result of subtraction of the given point from the current.
-        subtract: function(point) {
-          return this.clone()._subtract(toPoint(point));
-        },
-        _subtract: function(point) {
-          this.x -= point.x;
-          this.y -= point.y;
-          return this;
-        },
-        // @method divideBy(num: Number): Point
-        // Returns the result of division of the current point by the given number.
-        divideBy: function(num) {
-          return this.clone()._divideBy(num);
-        },
-        _divideBy: function(num) {
-          this.x /= num;
-          this.y /= num;
-          return this;
-        },
-        // @method multiplyBy(num: Number): Point
-        // Returns the result of multiplication of the current point by the given number.
-        multiplyBy: function(num) {
-          return this.clone()._multiplyBy(num);
-        },
-        _multiplyBy: function(num) {
-          this.x *= num;
-          this.y *= num;
-          return this;
-        },
-        // @method scaleBy(scale: Point): Point
-        // Multiply each coordinate of the current point by each coordinate of
-        // `scale`. In linear algebra terms, multiply the point by the
-        // [scaling matrix](https://en.wikipedia.org/wiki/Scaling_%28geometry%29#Matrix_representation)
-        // defined by `scale`.
-        scaleBy: function(point) {
-          return new Point(this.x * point.x, this.y * point.y);
-        },
-        // @method unscaleBy(scale: Point): Point
-        // Inverse of `scaleBy`. Divide each coordinate of the current point by
-        // each coordinate of `scale`.
-        unscaleBy: function(point) {
-          return new Point(this.x / point.x, this.y / point.y);
-        },
-        // @method round(): Point
-        // Returns a copy of the current point with rounded coordinates.
-        round: function() {
-          return this.clone()._round();
-        },
-        _round: function() {
-          this.x = Math.round(this.x);
-          this.y = Math.round(this.y);
-          return this;
-        },
-        // @method floor(): Point
-        // Returns a copy of the current point with floored coordinates (rounded down).
-        floor: function() {
-          return this.clone()._floor();
-        },
-        _floor: function() {
-          this.x = Math.floor(this.x);
-          this.y = Math.floor(this.y);
-          return this;
-        },
-        // @method ceil(): Point
-        // Returns a copy of the current point with ceiled coordinates (rounded up).
-        ceil: function() {
-          return this.clone()._ceil();
-        },
-        _ceil: function() {
-          this.x = Math.ceil(this.x);
-          this.y = Math.ceil(this.y);
-          return this;
-        },
-        // @method trunc(): Point
-        // Returns a copy of the current point with truncated coordinates (rounded towards zero).
-        trunc: function() {
-          return this.clone()._trunc();
-        },
-        _trunc: function() {
-          this.x = trunc(this.x);
-          this.y = trunc(this.y);
-          return this;
-        },
-        // @method distanceTo(otherPoint: Point): Number
-        // Returns the cartesian distance between the current and the given points.
-        distanceTo: function(point) {
-          point = toPoint(point);
-          var x = point.x - this.x, y = point.y - this.y;
-          return Math.sqrt(x * x + y * y);
-        },
-        // @method equals(otherPoint: Point): Boolean
-        // Returns `true` if the given point has the same coordinates.
-        equals: function(point) {
-          point = toPoint(point);
-          return point.x === this.x && point.y === this.y;
-        },
-        // @method contains(otherPoint: Point): Boolean
-        // Returns `true` if both coordinates of the given point are less than the corresponding current point coordinates (in absolute values).
-        contains: function(point) {
-          point = toPoint(point);
-          return Math.abs(point.x) <= Math.abs(this.x) && Math.abs(point.y) <= Math.abs(this.y);
-        },
-        // @method toString(): String
-        // Returns a string representation of the point for debugging purposes.
-        toString: function() {
-          return "Point(" + formatNum(this.x) + ", " + formatNum(this.y) + ")";
-        }
-      };
-    }
-  });
-
-  // node_modules/leaflet/src/layer/vector/SVG.Util.js
-  function svgCreate(name) {
-    return document.createElementNS("http://www.w3.org/2000/svg", name);
-  }
-  var init_SVG_Util = __esm({
-    "node_modules/leaflet/src/layer/vector/SVG.Util.js"() {
-      init_Browser();
-    }
-  });
-
-  // node_modules/leaflet/src/core/Browser.js
-  function userAgentContains(str) {
-    return navigator.userAgent.toLowerCase().indexOf(str) >= 0;
-  }
-  var style, ie, ielt9, edge, webkit, android, android23, webkitVer, androidStock, opera, chrome, gecko, safari, phantom, opera12, win, ie3d, webkit3d, gecko3d, any3d, mobile, mobileWebkit, mobileWebkit3d, msPointer, pointer, touchNative, touch, mobileOpera, mobileGecko, retina, passiveEvents, canvas, svg, inlineSvg, vml, mac, linux, Browser_default;
-  var init_Browser = __esm({
-    "node_modules/leaflet/src/core/Browser.js"() {
-      init_Util();
-      init_SVG_Util();
-      style = document.documentElement.style;
-      ie = "ActiveXObject" in window;
-      ielt9 = ie && !document.addEventListener;
-      edge = "msLaunchUri" in navigator && !("documentMode" in document);
-      webkit = userAgentContains("webkit");
-      android = userAgentContains("android");
-      android23 = userAgentContains("android 2") || userAgentContains("android 3");
-      webkitVer = parseInt(/WebKit\/([0-9]+)|$/.exec(navigator.userAgent)[1], 10);
-      androidStock = android && userAgentContains("Google") && webkitVer < 537 && !("AudioNode" in window);
-      opera = !!window.opera;
-      chrome = !edge && userAgentContains("chrome");
-      gecko = userAgentContains("gecko") && !webkit && !opera && !ie;
-      safari = !chrome && userAgentContains("safari");
-      phantom = userAgentContains("phantom");
-      opera12 = "OTransition" in style;
-      win = navigator.platform.indexOf("Win") === 0;
-      ie3d = ie && "transition" in style;
-      webkit3d = "WebKitCSSMatrix" in window && "m11" in new window.WebKitCSSMatrix() && !android23;
-      gecko3d = "MozPerspective" in style;
-      any3d = !window.L_DISABLE_3D && (ie3d || webkit3d || gecko3d) && !opera12 && !phantom;
-      mobile = typeof orientation !== "undefined" || userAgentContains("mobile");
-      mobileWebkit = mobile && webkit;
-      mobileWebkit3d = mobile && webkit3d;
-      msPointer = !window.PointerEvent && window.MSPointerEvent;
-      pointer = !!(window.PointerEvent || msPointer);
-      touchNative = "ontouchstart" in window || !!window.TouchEvent;
-      touch = !window.L_NO_TOUCH && (touchNative || pointer);
-      mobileOpera = mobile && opera;
-      mobileGecko = mobile && gecko;
-      retina = (window.devicePixelRatio || window.screen.deviceXDPI / window.screen.logicalXDPI) > 1;
-      passiveEvents = function() {
-        var supportsPassiveOption = false;
-        try {
-          var opts = Object.defineProperty({}, "passive", {
-            get: function() {
-              supportsPassiveOption = true;
-            }
-          });
-          window.addEventListener("testPassiveEventSupport", falseFn, opts);
-          window.removeEventListener("testPassiveEventSupport", falseFn, opts);
-        } catch (e) {
-        }
-        return supportsPassiveOption;
-      }();
-      canvas = function() {
-        return !!document.createElement("canvas").getContext;
-      }();
-      svg = !!(document.createElementNS && svgCreate("svg").createSVGRect);
-      inlineSvg = !!svg && function() {
-        var div = document.createElement("div");
-        div.innerHTML = "<svg/>";
-        return (div.firstChild && div.firstChild.namespaceURI) === "http://www.w3.org/2000/svg";
-      }();
-      vml = !svg && function() {
-        try {
-          var div = document.createElement("div");
-          div.innerHTML = '<v:shape adj="1"/>';
-          var shape = div.firstChild;
-          shape.style.behavior = "url(#default#VML)";
-          return shape && typeof shape.adj === "object";
-        } catch (e) {
-          return false;
-        }
-      }();
-      mac = navigator.platform.indexOf("Mac") === 0;
-      linux = navigator.platform.indexOf("Linux") === 0;
-      Browser_default = {
-        ie,
-        ielt9,
-        edge,
-        webkit,
-        android,
-        android23,
-        androidStock,
-        opera,
-        chrome,
-        gecko,
-        safari,
-        phantom,
-        opera12,
-        win,
-        ie3d,
-        webkit3d,
-        gecko3d,
-        any3d,
-        mobile,
-        mobileWebkit,
-        mobileWebkit3d,
-        msPointer,
-        pointer,
-        touch,
-        touchNative,
-        mobileOpera,
-        mobileGecko,
-        retina,
-        passiveEvents,
-        canvas,
-        svg,
-        vml,
-        inlineSvg,
-        mac,
-        linux
-      };
-    }
-  });
-
-  // node_modules/leaflet/src/dom/DomEvent.Pointer.js
-  function addPointerListener(obj, type, handler) {
-    if (type === "touchstart") {
-      _addPointerDocListener();
-    }
-    if (!handle[type]) {
-      console.warn("wrong event specified:", type);
-      return falseFn;
-    }
-    handler = handle[type].bind(this, handler);
-    obj.addEventListener(pEvent[type], handler, false);
-    return handler;
-  }
-  function removePointerListener(obj, type, handler) {
-    if (!pEvent[type]) {
-      console.warn("wrong event specified:", type);
-      return;
-    }
-    obj.removeEventListener(pEvent[type], handler, false);
-  }
-  function _globalPointerDown(e) {
-    _pointers[e.pointerId] = e;
-  }
-  function _globalPointerMove(e) {
-    if (_pointers[e.pointerId]) {
-      _pointers[e.pointerId] = e;
-    }
-  }
-  function _globalPointerUp(e) {
-    delete _pointers[e.pointerId];
-  }
-  function _addPointerDocListener() {
-    if (!_pointerDocListener) {
-      document.addEventListener(POINTER_DOWN, _globalPointerDown, true);
-      document.addEventListener(POINTER_MOVE, _globalPointerMove, true);
-      document.addEventListener(POINTER_UP, _globalPointerUp, true);
-      document.addEventListener(POINTER_CANCEL, _globalPointerUp, true);
-      _pointerDocListener = true;
-    }
-  }
-  function _handlePointer(handler, e) {
-    if (e.pointerType === (e.MSPOINTER_TYPE_MOUSE || "mouse")) {
-      return;
-    }
-    e.touches = [];
-    for (var i in _pointers) {
-      e.touches.push(_pointers[i]);
-    }
-    e.changedTouches = [e];
-    handler(e);
-  }
-  function _onPointerStart(handler, e) {
-    if (e.MSPOINTER_TYPE_TOUCH && e.pointerType === e.MSPOINTER_TYPE_TOUCH) {
-      preventDefault(e);
-    }
-    _handlePointer(handler, e);
-  }
-  var POINTER_DOWN, POINTER_MOVE, POINTER_UP, POINTER_CANCEL, pEvent, handle, _pointers, _pointerDocListener;
-  var init_DomEvent_Pointer = __esm({
-    "node_modules/leaflet/src/dom/DomEvent.Pointer.js"() {
-      init_DomEvent();
-      init_Browser();
-      init_Util();
-      POINTER_DOWN = Browser_default.msPointer ? "MSPointerDown" : "pointerdown";
-      POINTER_MOVE = Browser_default.msPointer ? "MSPointerMove" : "pointermove";
-      POINTER_UP = Browser_default.msPointer ? "MSPointerUp" : "pointerup";
-      POINTER_CANCEL = Browser_default.msPointer ? "MSPointerCancel" : "pointercancel";
-      pEvent = {
-        touchstart: POINTER_DOWN,
-        touchmove: POINTER_MOVE,
-        touchend: POINTER_UP,
-        touchcancel: POINTER_CANCEL
-      };
-      handle = {
-        touchstart: _onPointerStart,
-        touchmove: _handlePointer,
-        touchend: _handlePointer,
-        touchcancel: _handlePointer
-      };
-      _pointers = {};
-      _pointerDocListener = false;
-    }
-  });
-
-  // node_modules/leaflet/src/dom/DomEvent.DoubleTap.js
-  function makeDblclick(event) {
-    var newEvent = {}, prop, i;
-    for (i in event) {
-      prop = event[i];
-      newEvent[i] = prop && prop.bind ? prop.bind(event) : prop;
-    }
-    event = newEvent;
-    newEvent.type = "dblclick";
-    newEvent.detail = 2;
-    newEvent.isTrusted = false;
-    newEvent._simulated = true;
-    return newEvent;
-  }
-  function addDoubleTapListener(obj, handler) {
-    obj.addEventListener("dblclick", handler);
-    var last = 0, detail;
-    function simDblclick(e) {
-      if (e.detail !== 1) {
-        detail = e.detail;
-        return;
-      }
-      if (e.pointerType === "mouse" || e.sourceCapabilities && !e.sourceCapabilities.firesTouchEvents) {
-        return;
-      }
-      var path = getPropagationPath(e);
-      if (path.some(function(el) {
-        return el instanceof HTMLLabelElement && el.attributes.for;
-      }) && !path.some(function(el) {
-        return el instanceof HTMLInputElement || el instanceof HTMLSelectElement;
-      })) {
-        return;
-      }
-      var now = Date.now();
-      if (now - last <= delay) {
-        detail++;
-        if (detail === 2) {
-          handler(makeDblclick(e));
-        }
-      } else {
-        detail = 1;
-      }
-      last = now;
-    }
-    obj.addEventListener("click", simDblclick);
-    return {
-      dblclick: handler,
-      simDblclick
-    };
-  }
-  function removeDoubleTapListener(obj, handlers) {
-    obj.removeEventListener("dblclick", handlers.dblclick);
-    obj.removeEventListener("click", handlers.simDblclick);
-  }
-  var delay;
-  var init_DomEvent_DoubleTap = __esm({
-    "node_modules/leaflet/src/dom/DomEvent.DoubleTap.js"() {
-      init_DomEvent();
-      delay = 200;
-    }
-  });
-
-  // node_modules/leaflet/src/dom/DomEvent.js
-  function on(obj, types, fn, context) {
-    if (types && typeof types === "object") {
-      for (var type in types) {
-        addOne(obj, type, types[type], fn);
-      }
-    } else {
-      types = splitWords(types);
-      for (var i = 0, len = types.length; i < len; i++) {
-        addOne(obj, types[i], fn, context);
-      }
-    }
-    return this;
-  }
-  function off(obj, types, fn, context) {
-    if (arguments.length === 1) {
-      batchRemove(obj);
-      delete obj[eventsKey];
-    } else if (types && typeof types === "object") {
-      for (var type in types) {
-        removeOne(obj, type, types[type], fn);
-      }
-    } else {
-      types = splitWords(types);
-      if (arguments.length === 2) {
-        batchRemove(obj, function(type2) {
-          return indexOf(types, type2) !== -1;
-        });
-      } else {
-        for (var i = 0, len = types.length; i < len; i++) {
-          removeOne(obj, types[i], fn, context);
-        }
-      }
-    }
-    return this;
-  }
-  function batchRemove(obj, filterFn) {
-    for (var id in obj[eventsKey]) {
-      var type = id.split(/\d/)[0];
-      if (!filterFn || filterFn(type)) {
-        removeOne(obj, type, null, null, id);
-      }
-    }
-  }
-  function addOne(obj, type, fn, context) {
-    var id = type + stamp(fn) + (context ? "_" + stamp(context) : "");
-    if (obj[eventsKey] && obj[eventsKey][id]) {
-      return this;
-    }
-    var handler = function(e) {
-      return fn.call(context || obj, e || window.event);
-    };
-    var originalHandler = handler;
-    if (!Browser_default.touchNative && Browser_default.pointer && type.indexOf("touch") === 0) {
-      handler = addPointerListener(obj, type, handler);
-    } else if (Browser_default.touch && type === "dblclick") {
-      handler = addDoubleTapListener(obj, handler);
-    } else if ("addEventListener" in obj) {
-      if (type === "touchstart" || type === "touchmove" || type === "wheel" || type === "mousewheel") {
-        obj.addEventListener(mouseSubst[type] || type, handler, Browser_default.passiveEvents ? { passive: false } : false);
-      } else if (type === "mouseenter" || type === "mouseleave") {
-        handler = function(e) {
-          e = e || window.event;
-          if (isExternalTarget(obj, e)) {
-            originalHandler(e);
-          }
-        };
-        obj.addEventListener(mouseSubst[type], handler, false);
-      } else {
-        obj.addEventListener(type, originalHandler, false);
-      }
-    } else {
-      obj.attachEvent("on" + type, handler);
-    }
-    obj[eventsKey] = obj[eventsKey] || {};
-    obj[eventsKey][id] = handler;
-  }
-  function removeOne(obj, type, fn, context, id) {
-    id = id || type + stamp(fn) + (context ? "_" + stamp(context) : "");
-    var handler = obj[eventsKey] && obj[eventsKey][id];
-    if (!handler) {
-      return this;
-    }
-    if (!Browser_default.touchNative && Browser_default.pointer && type.indexOf("touch") === 0) {
-      removePointerListener(obj, type, handler);
-    } else if (Browser_default.touch && type === "dblclick") {
-      removeDoubleTapListener(obj, handler);
-    } else if ("removeEventListener" in obj) {
-      obj.removeEventListener(mouseSubst[type] || type, handler, false);
-    } else {
-      obj.detachEvent("on" + type, handler);
-    }
-    obj[eventsKey][id] = null;
-  }
-  function preventDefault(e) {
-    if (e.preventDefault) {
-      e.preventDefault();
-    } else {
-      e.returnValue = false;
-    }
-    return this;
-  }
-  function getPropagationPath(ev) {
-    if (ev.composedPath) {
-      return ev.composedPath();
-    }
-    var path = [];
-    var el = ev.target;
-    while (el) {
-      path.push(el);
-      el = el.parentNode;
-    }
-    return path;
-  }
-  function isExternalTarget(el, e) {
-    var related = e.relatedTarget;
-    if (!related) {
-      return true;
-    }
-    try {
-      while (related && related !== el) {
-        related = related.parentNode;
-      }
-    } catch (err) {
-      return false;
-    }
-    return related !== el;
-  }
-  var eventsKey, mouseSubst, wheelPxFactor;
-  var init_DomEvent = __esm({
-    "node_modules/leaflet/src/dom/DomEvent.js"() {
-      init_Point();
-      init_Util();
-      init_Browser();
-      init_DomEvent_Pointer();
-      init_DomEvent_DoubleTap();
-      init_DomUtil();
-      eventsKey = "_leaflet_events";
-      mouseSubst = {
-        mouseenter: "mouseover",
-        mouseleave: "mouseout",
-        wheel: !("onwheel" in window) && "mousewheel"
-      };
-      wheelPxFactor = Browser_default.linux && Browser_default.chrome ? window.devicePixelRatio : Browser_default.mac ? window.devicePixelRatio * 3 : window.devicePixelRatio > 0 ? 2 * window.devicePixelRatio : 1;
-    }
-  });
-
-  // node_modules/leaflet/src/dom/DomUtil.js
-  function testProp(props) {
-    var style2 = document.documentElement.style;
-    for (var i = 0; i < props.length; i++) {
-      if (props[i] in style2) {
-        return props[i];
-      }
-    }
-    return false;
-  }
-  var TRANSFORM, TRANSITION, TRANSITION_END, disableTextSelection, enableTextSelection, _userSelect, userSelectProperty;
-  var init_DomUtil = __esm({
-    "node_modules/leaflet/src/dom/DomUtil.js"() {
-      init_DomEvent();
-      init_Util();
-      init_Point();
-      init_Browser();
-      TRANSFORM = testProp(
-        ["transform", "webkitTransform", "OTransform", "MozTransform", "msTransform"]
-      );
-      TRANSITION = testProp(
-        ["webkitTransition", "transition", "OTransition", "MozTransition", "msTransition"]
-      );
-      TRANSITION_END = TRANSITION === "webkitTransition" || TRANSITION === "OTransition" ? TRANSITION + "End" : "transitionend";
-      if ("onselectstart" in document) {
-        disableTextSelection = function() {
-          on(window, "selectstart", preventDefault);
-        };
-        enableTextSelection = function() {
-          off(window, "selectstart", preventDefault);
-        };
-      } else {
-        userSelectProperty = testProp(
-          ["userSelect", "WebkitUserSelect", "OUserSelect", "MozUserSelect", "msUserSelect"]
-        );
-        disableTextSelection = function() {
-          if (userSelectProperty) {
-            var style2 = document.documentElement.style;
-            _userSelect = style2[userSelectProperty];
-            style2[userSelectProperty] = "none";
-          }
-        };
-        enableTextSelection = function() {
-          if (userSelectProperty) {
-            document.documentElement.style[userSelectProperty] = _userSelect;
-            _userSelect = void 0;
-          }
-        };
-      }
-    }
-  });
-
   // lib/map_ui.js
   function fetchData(url) {
     return __async(this, null, function* () {
-      const response = yield fetchApi(url);
-      const data = yield response.json();
-      return data.data.stations;
+      const response = yield fetchWithProxy(url);
+      return response.data.stations;
     });
   }
   function createMarker(station, status, map) {
@@ -13959,9 +13289,9 @@
     }) }).addTo(map);
     marker.bindPopup(`
         <b>${station.name}</b><br>
-        Adresse: ${station.address}<br>
-        V\xE9los disponibles: ${status.num_bikes_available}<br>
-        Places libres: ${status.num_docks_available}
+        <b>Adresse:</b> ${station.address}<br>
+        <b>V\xE9los disponibles:</b> ${status.num_bikes_available}<br>
+        <b>Places libres:</b> ${status.num_docks_available}
     `);
   }
   function createIncident(incident, map) {
@@ -13978,10 +13308,10 @@
     }).addTo(map);
     marker.bindPopup(`
         <b>${short_description}</b><br>
-        Description: ${incident.description}<br>
-        D\xE9but: ${incident.starttime}<br>
-        Fin: ${incident.endtime}<br>
-        Localisation: ${location.location_description}
+        <b>Description:</b> ${incident.description}<br>
+        <b>D\xE9but:</b> ${incident.starttime}<br>
+        <b>Fin:</b> ${incident.endtime}<br>
+        <b>Localisation:</b> ${location.location_description}
     `);
   }
   function createRestaurantMarker(restaurant, map) {
@@ -14030,7 +13360,7 @@
             idRestaurant: parseInt(formData.get("idRestaurant"))
           };
           try {
-            const response = yield fetchApi(`${API_SERVEUR_URL}/reserverTable`, {
+            const response = yield fetchWithProxy(`${API_SERVEUR_URL}/reserverTable`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json"
@@ -14047,12 +13377,27 @@
       });
     });
   }
+  function createEtablissementMarker(etablissement, map) {
+    const marker = import_leaflet18.default.marker([etablissement.coordonnees.lat, etablissement.coordonnees.lon], {
+      icon: import_leaflet18.default.icon({
+        iconUrl: "../resources/icon-etablissement.png",
+        iconSize: [41, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      })
+    }).addTo(map);
+    marker.bindPopup(`
+        <b>${etablissement.implantation_lib}</b><br>
+        <b>Si\xE8ge Lib\xE9ral:</b> ${etablissement.siege_lib}<br>
+        <b>Type d'\xE9tablissement:</b> ${etablissement.type_d_etablissement}<br>
+        <b>Adresse: </b>${etablissement.adresse_uai}
+    `);
+  }
   function getRestaurants() {
     return __async(this, null, function* () {
       try {
-        const response = yield fetch(`${API_SERVEUR_URL}/restaurants`);
-        const restaurantsReceived = yield response.json();
-        return restaurantsReceived;
+        return yield fetchWithProxy(`${API_SERVEUR_URL}/restaurants`);
       } catch (error) {
         console.error("Error:", error);
       }
@@ -14061,12 +13406,37 @@
   function getIncidents() {
     return __async(this, null, function* () {
       try {
-        const response = yield fetch(`${API_SERVEUR_URL}/incidents`);
-        const incidentsReceived = yield response.json();
-        return incidentsReceived.incidents;
+        return yield fetchWithProxy(INCIDENTS_URL);
       } catch (error) {
         console.error("Error:", error);
       }
+    });
+  }
+  function getEtablissements() {
+    return __async(this, null, function* () {
+      try {
+        return yield fetchWithProxy(API_ETABLISSEMENTS_SUPERIEURS);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    });
+  }
+  function displayWeatherData(weatherData) {
+    const weatherForecast = document.getElementById("weather-forecast");
+    weatherForecast.innerHTML = "";
+    const hours = Object.keys(weatherData).filter((key) => key.includes(":00:00"));
+    hours.forEach((hour) => {
+      const weather = weatherData[hour];
+      const weatherCard = document.createElement("div");
+      weatherCard.className = "weather-card";
+      const time = new Date(hour).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      weatherCard.innerHTML = `
+            <div class="weather-time">${hour}</div>
+            <div class="weather-temp">${(weather.temperature["2m"] - 273.15).toFixed(1)} \xB0C</div>
+            <div class="weather-humidity">Humidit\xE9: ${weather.humidite["2m"]}%</div>
+            <div class="weather-wind">Vent: ${weather.vent_moyen["10m"]} km/h</div>
+        `;
+      weatherForecast.appendChild(weatherCard);
     });
   }
   function initMap() {
@@ -14090,8 +13460,13 @@
           createRestaurantMarker(restaurant, map);
         });
         ajouterEvenementAjoutRestaurant(map);
+        const etablissementsReceived = yield getEtablissements();
+        console.log(JSON.stringify(etablissementsReceived.results));
+        etablissementsReceived.results.forEach((etablissement) => {
+          createEtablissementMarker(etablissement, map);
+        });
         const incidentsReceived = yield getIncidents();
-        incidentsReceived.forEach((incident) => {
+        incidentsReceived.incidents.forEach((incident) => {
           createIncident(incident, map);
         });
         const legend = import_leaflet18.default.control({ position: "bottomright" });
@@ -14100,9 +13475,12 @@
           div.innerHTML += '<i style="background: url(../resources/icon-bicycle.png) no-repeat center center / contain"></i>Stations V\xE9lib<br>';
           div.innerHTML += '<i style="background: url(../resources/icon-restaurant.png) no-repeat center center / contain"></i>Restaurants<br>';
           div.innerHTML += '<i style="background: url(../resources/icon-incident.png) no-repeat center center / contain"></i>Incidents<br>';
+          div.innerHTML += '<i style="background: url(../resources/icon-etablissement.png) no-repeat center center / contain"></i>Etablissements du sup\xE9rieur<br>';
           return div;
         };
         legend.addTo(map);
+        const weatherData = yield fetchWithProxy(meteoUrl);
+        displayWeatherData(weatherData);
       } catch (error) {
         console.error("Erreur lors de la r\xE9cup\xE9ration des donn\xE9es :", error);
       }
@@ -14117,7 +13495,6 @@
       import_leaflet19 = __toESM(require_leaflet_markercluster_src());
       init_leaflet_heat();
       init_src();
-      init_DomUtil();
       ajouterEvenementAjoutRestaurant = (map) => {
         map.on("click", function(e) {
           return __async(this, null, function* () {
@@ -14147,7 +13524,7 @@
                       Longitude: lng
                     };
                     try {
-                      const response = yield fetchApi(`${API_SERVEUR_URL}/ajouterRestaurant`, {
+                      const response = yield fetchWithProxy(`${API_SERVEUR_URL}/ajouterRestaurant`, {
                         method: "POST",
                         headers: {
                           "Content-Type": "application/json"
@@ -14177,7 +13554,9 @@
   var require_front = __commonJS({
     "index.js"(exports) {
       init_map_ui();
+      init_map_ui();
       init_dataloader();
+      init_config();
       document.addEventListener("DOMContentLoaded", () => __async(exports, null, function* () {
         yield initMap();
       }));

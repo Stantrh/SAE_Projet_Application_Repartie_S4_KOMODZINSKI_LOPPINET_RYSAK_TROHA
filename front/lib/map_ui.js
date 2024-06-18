@@ -1,16 +1,21 @@
-import {API_SERVEUR_URL, stationInfoUrl, stationStatusUrl} from "./config";
-import {fetchApi} from "./dataloader";
+import {
+    API_SERVEUR_URL,
+    stationInfoUrl,
+    stationStatusUrl,
+    INCIDENTS_URL,
+    API_ETABLISSEMENTS_SUPERIEURS, meteoUrl
+} from "./config";
+import {fetchWithProxy} from "./dataloader";
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet.heat';
 import 'leaflet-control-geocoder';
-import {get} from "leaflet/src/dom/DomUtil";
 
 async function fetchData(url) {
-    const response = await fetchApi(url);
-    const data = await response.json();
-    return data.data.stations;
+    const response = await fetchWithProxy(url);
+    return response.data.stations;
 }
+
 
 function createMarker(station, status, map) {
     const marker = L.marker([station.lat, station.lon], {icon: L.icon({
@@ -22,9 +27,9 @@ function createMarker(station, status, map) {
         })}).addTo(map);
     marker.bindPopup(`
         <b>${station.name}</b><br>
-        Adresse: ${station.address}<br>
-        Vélos disponibles: ${status.num_bikes_available}<br>
-        Places libres: ${status.num_docks_available}
+        <b>Adresse:</b> ${station.address}<br>
+        <b>Vélos disponibles:</b> ${status.num_bikes_available}<br>
+        <b>Places libres:</b> ${status.num_docks_available}
     `);
 }
 
@@ -44,10 +49,10 @@ function createIncident(incident, map) {
 
     marker.bindPopup(`
         <b>${short_description}</b><br>
-        Description: ${incident.description}<br>
-        Début: ${incident.starttime}<br>
-        Fin: ${incident.endtime}<br>
-        Localisation: ${location.location_description}
+        <b>Description:</b> ${incident.description}<br>
+        <b>Début:</b> ${incident.starttime}<br>
+        <b>Fin:</b> ${incident.endtime}<br>
+        <b>Localisation:</b> ${location.location_description}
     `);
 }
 
@@ -103,7 +108,7 @@ function createRestaurantMarker(restaurant, map) {
             };
 
             try {
-                const response = await fetchApi(`${API_SERVEUR_URL}/reserverTable`, {
+                const response = await fetchWithProxy(`${API_SERVEUR_URL}/reserverTable`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -119,6 +124,29 @@ function createRestaurantMarker(restaurant, map) {
         });
     });
 }
+
+
+function createEtablissementMarker(etablissement, map){
+    const marker = L.marker([etablissement.coordonnees.lat, etablissement.coordonnees.lon], {
+        icon: L.icon({
+            iconUrl: '../resources/icon-etablissement.png',
+            iconSize: [41, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        })
+    }).addTo(map);
+
+    marker.bindPopup(`
+        <b>${etablissement.implantation_lib}</b><br>
+        <b>Siège Libéral:</b> ${etablissement.siege_lib}<br>
+        <b>Type d'établissement:</b> ${etablissement.type_d_etablissement}<br>
+        <b>Adresse: </b>${etablissement.adresse_uai}
+    `);
+}
+
+
+
 
 const ajouterEvenementAjoutRestaurant = (map) => {
     map.on('click', async function(e) {
@@ -160,7 +188,7 @@ const ajouterEvenementAjoutRestaurant = (map) => {
                     };
 
                     try {
-                        const response = await fetchApi(`${API_SERVEUR_URL}/ajouterRestaurant`, {
+                        const response = await fetchWithProxy(`${API_SERVEUR_URL}/ajouterRestaurant`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -189,9 +217,7 @@ const ajouterEvenementAjoutRestaurant = (map) => {
 
 async function getRestaurants() {
     try {
-        const response = await fetch(`${API_SERVEUR_URL}/restaurants`);
-        const restaurantsReceived = await response.json();
-        return restaurantsReceived;
+        return await fetchWithProxy(`${API_SERVEUR_URL}/restaurants`);
     } catch (error) {
         console.error('Error:', error);
     }
@@ -199,15 +225,43 @@ async function getRestaurants() {
 
 async function getIncidents() {
     try {
-        const response = await fetch(`${API_SERVEUR_URL}/incidents`);
-        const incidentsReceived = await response.json();
-        return incidentsReceived.incidents;
+        return await fetchWithProxy(INCIDENTS_URL);
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
+async function getEtablissements(){
+    try{
+        return await fetchWithProxy(API_ETABLISSEMENTS_SUPERIEURS);
+    }catch(error){
+        console.error('Error:', error);
+    }
+}
 
+
+
+export function displayWeatherData(weatherData) {
+    const weatherForecast = document.getElementById('weather-forecast');
+    weatherForecast.innerHTML = ''; // Clear previous data
+
+    const hours = Object.keys(weatherData).filter(key => key.includes(':00:00'));
+    hours.forEach(hour => {
+        const weather = weatherData[hour];
+        const weatherCard = document.createElement('div');
+        weatherCard.className = 'weather-card';
+
+        const time = new Date(hour).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        weatherCard.innerHTML = `
+            <div class="weather-time">${hour}</div>
+            <div class="weather-temp">${(weather.temperature['2m'] - 273.15).toFixed(1)} °C</div>
+            <div class="weather-humidity">Humidité: ${weather.humidite['2m']}%</div>
+            <div class="weather-wind">Vent: ${weather.vent_moyen['10m']} km/h</div>
+        `;
+
+        weatherForecast.appendChild(weatherCard);
+    });
+}
 
 
 export async function initMap() {
@@ -237,9 +291,16 @@ export async function initMap() {
 
         ajouterEvenementAjoutRestaurant(map);
 
-        const incidentsReceived = await getIncidents();
 
-        incidentsReceived.forEach(incident => {
+        const etablissementsReceived = await getEtablissements();
+        console.log(JSON.stringify(etablissementsReceived.results));
+        etablissementsReceived.results.forEach(etablissement => {
+            createEtablissementMarker(etablissement, map)
+        });
+
+
+        const incidentsReceived = await getIncidents();
+        incidentsReceived.incidents.forEach(incident => {
             createIncident(incident, map);
         });
 
@@ -250,10 +311,15 @@ export async function initMap() {
             div.innerHTML += '<i style="background: url(../resources/icon-bicycle.png) no-repeat center center / contain"></i>Stations Vélib<br>';
             div.innerHTML += '<i style="background: url(../resources/icon-restaurant.png) no-repeat center center / contain"></i>Restaurants<br>';
             div.innerHTML += '<i style="background: url(../resources/icon-incident.png) no-repeat center center / contain"></i>Incidents<br>';
+            div.innerHTML += '<i style="background: url(../resources/icon-etablissement.png) no-repeat center center / contain"></i>Etablissements du supérieur<br>';
             return div;
         };
 
         legend.addTo(map);
+
+
+        const weatherData = await fetchWithProxy(meteoUrl);
+        displayWeatherData(weatherData);
 
 
     } catch (error) {
