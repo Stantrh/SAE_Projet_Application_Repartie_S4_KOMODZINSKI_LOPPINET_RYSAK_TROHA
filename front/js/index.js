@@ -13506,12 +13506,12 @@
               if (result) {
                 const address = result.name;
                 const popupContent = `
-                        <form id="restaurant-form">
-                            <label for="restaurant-name">Nom du restaurant:</label>
-                            <input type="text" id="restaurant-name" name="restaurant-name" required>
-                            <button type="submit">Ajouter</button>
-                        </form>
-                    `;
+                    <form id="restaurant-form" style="display: flex; flex-direction: column; gap: 10px; max-width: 300px;">
+                        <label for="restaurant-name" style="font-weight: bold; color: #333;">Nom du restaurant:</label>
+                        <input type="text" id="restaurant-name" name="restaurant-name" required style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
+                        <button type="submit" style="padding: 10px; border-radius: 5px; border: none; background-color: #4CAF50; color: white; font-weight: bold; cursor: pointer; font-size: 16px;">Ajouter</button>
+                    </form>
+                `;
                 const popup = import_leaflet18.default.popup().setLatLng(e.latlng).setContent(popupContent).openOn(map);
                 document.getElementById("restaurant-form").addEventListener("submit", function(event) {
                   return __async(this, null, function* () {
