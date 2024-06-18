@@ -12,7 +12,6 @@ public class LancerServiceRMI {
             Registry reg = LocateRegistry.getRegistry("localhost"); // Créer un registre sur le port 1099
             try {
                 ServiceRestaurant service = new ServiceRestaurant(args[0], args[1]);
-                System.out.println(service.getAllRestaurant());
                 
                 ServiceBDD rd1 = (ServiceBDD) service;
                 reg.rebind("DistributeurRMI", rd1);
