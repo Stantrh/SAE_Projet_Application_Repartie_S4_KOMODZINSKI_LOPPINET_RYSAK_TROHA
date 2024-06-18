@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>SAE Prog Répartie - Nancy Info</title>
+  <title>SAE Programmation Répartie - Nancy Info</title>
   <link rel="stylesheet" href="../css/index.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -10,13 +10,12 @@
 </head>
 <body>
 <header>
-  <h1>SAE Prog Répartie</h1>
+  <h1>SAE Programmation Répartie</h1>
   <nav>
     <ul>
       <li><a href="#home">Accueil</a></li>
-      <li><a href="#map">Carte Vélibs</a></li>
-      <li><a href="#module1">Module 1</a></li>
-      <li><a href="#module2">Module 2</a></li>
+      <li><a href="#map">Carte de données hétérogènes</a></li>
+      <li><a href="#meteo">Météo</a></li>
       <li><a href="#compte-rendu">Compte Rendu</a></li>
     </ul>
   </nav>
@@ -24,19 +23,15 @@
 <main>
   <section id="home">
     <h2>Accueil</h2>
-    <p>Bienvenue sur le site de présentation des informations hétérogènes sur Nancy. Utilisez le menu pour naviguer entre les différentes rubriques.</p>
+    <p>Bienvenue sur le site de présentation des informations hétérogènes sur Nancy. Utilisez le menu pour naviguer entre les différentes rubriques. Le site est basé sur le modèle SPA, c'est à dire que toutes les informations sont chargées dynamiquement sur la même page.</p>
   </section>
-  <section id="map">
-    <h2>Carte Vélibs</h2>
+  <section>
+    <h2>Carte</h2>
     <div id="map"></div>
   </section>
-  <section id="module1">
-    <h2>Module 1</h2>
-    <p>Contenu du Module 1</p>
-  </section>
-  <section id="module2">
-    <h2>Module 2</h2>
-    <p>Contenu du Module 2</p>
+  <section id="meteo">
+    <h1>Prévisions Météo</h1>
+    <div id="weather-forecast" class="weather-container"></div>
   </section>
   <section id="compte-rendu">
     <h2>Compte Rendu</h2>
@@ -45,6 +40,7 @@
 </main>
 <footer>
   <p>&copy; 2024 - Projet SAE Programmation Répartie</p>
+  <p>KOMODZINSKI - LOPPINET - RYSAK - TROHA </p>
 </footer>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -79,6 +79,56 @@ p {
     line-height: 1.6;
 }
 
+.legend {
+    background: white;
+    border: 2px solid black;
+    padding: 10px;
+    line-height: 1.5em;
+}
+
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+.weather-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+}
+
+.weather-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    width: 200px;
+}
+
+.weather-time {
+    font-size: 1.2em;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.weather-temp {
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.weather-humidity,
+.weather-wind {
+    margin-bottom: 5px;
+}
+
+
 
 footer {
     background-color: #333;
@@ -97,3 +147,4 @@ footer {
         margin: 0 20px;
     }
 }
+
