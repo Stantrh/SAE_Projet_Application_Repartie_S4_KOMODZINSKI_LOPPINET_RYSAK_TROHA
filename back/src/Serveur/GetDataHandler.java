@@ -8,6 +8,7 @@ import ServiceDonneesBloquees.DataService;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class GetDataHandler implements HttpHandler {
     private final DataService serviceData;
@@ -23,7 +24,9 @@ public class GetDataHandler implements HttpHandler {
             if("GET".equals(exchange.getRequestMethod())){
             try{
                 String response = this.serviceData.fetchData(url);
-                exchange.sendResponseHeaders(200, response.length());
+                // Il faut standardiser car les accents ont une longueur d'octets. L'utf8 prend en charge les accents
+                byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+                exchange.sendResponseHeaders(200, responseBytes.length);
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();

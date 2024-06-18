@@ -7,6 +7,8 @@ import com.sun.net.httpserver.HttpHandler;
 import Service.ServiceBDD;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
 
 public class RestaurantHandler implements HttpHandler {
     private final ServiceBDD serviceBDD;
@@ -20,7 +22,9 @@ public class RestaurantHandler implements HttpHandler {
             if("GET".equals(exchange.getRequestMethod())){
             try{
                 String restaurants = this.serviceBDD.getAllRestaurant();
-                exchange.sendResponseHeaders(200, restaurants.length());
+                // Il faut standardiser car les accents ont une longueur d'octets. L'utf8 prend en charge les accents
+                byte[] responseBytes = restaurants.getBytes(StandardCharsets.UTF_8);
+                exchange.sendResponseHeaders(200, responseBytes.length);
                 OutputStream os = exchange.getResponseBody();
                 os.write(restaurants.getBytes());
                 os.close();
