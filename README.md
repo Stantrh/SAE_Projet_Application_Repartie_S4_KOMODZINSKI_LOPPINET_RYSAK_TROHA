@@ -41,6 +41,6 @@ Pour installer et exécuter ce projet, suivez les étapes suivantes :
 Si vous avez des questions ou des commentaires, n'hésitez pas à nous contacter :
 
 - Étudiant 1 : komo@mail.com
-- Étudiant 2 : stephaneloppinet@gmail.com
+- Étudiant 2 : stephane.loppinet9@etu.univ-lorraine.fr
 - Étudiant 3 : rysaj@mail.com
 - Étudiant 4 : troha@mail.com
