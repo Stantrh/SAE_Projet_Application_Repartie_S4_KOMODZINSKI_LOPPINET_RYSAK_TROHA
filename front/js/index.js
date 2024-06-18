@@ -65,7 +65,6 @@
   // lib/dataloader.js
   function fetchApi(api, options) {
     return __async(this, null, function* () {
-      console.log("fetch api");
       return yield fetch(api, options);
     });
   }
@@ -13951,7 +13950,13 @@
     });
   }
   function createMarker(station, status, map) {
-    const marker = import_leaflet18.default.marker([station.lat, station.lon]).addTo(map);
+    const marker = import_leaflet18.default.marker([station.lat, station.lon], { icon: import_leaflet18.default.icon({
+      iconUrl: "../resources/icon-bicycle.png",
+      iconSize: [41, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    }) }).addTo(map);
     marker.bindPopup(`
         <b>${station.name}</b><br>
         Adresse: ${station.address}<br>
@@ -14089,6 +14094,15 @@
         incidentsReceived.forEach((incident) => {
           createIncident(incident, map);
         });
+        const legend = import_leaflet18.default.control({ position: "bottomright" });
+        legend.onAdd = function(map2) {
+          const div = import_leaflet18.default.DomUtil.create("div", "legend");
+          div.innerHTML += '<i style="background: url(../resources/icon-bicycle.png) no-repeat center center / contain"></i>Stations V\xE9lib<br>';
+          div.innerHTML += '<i style="background: url(../resources/icon-restaurant.png) no-repeat center center / contain"></i>Restaurants<br>';
+          div.innerHTML += '<i style="background: url(../resources/icon-incident.png) no-repeat center center / contain"></i>Incidents<br>';
+          return div;
+        };
+        legend.addTo(map);
       } catch (error) {
         console.error("Erreur lors de la r\xE9cup\xE9ration des donn\xE9es :", error);
       }
@@ -14156,7 +14170,6 @@
           });
         });
       };
-      getRestaurants();
     }
   });
 
@@ -14167,8 +14180,6 @@
       init_dataloader();
       document.addEventListener("DOMContentLoaded", () => __async(exports, null, function* () {
         yield initMap();
-        console.log("FETCH DE l'API DONNEES BLOQUEES");
-        const rep = yield fetchApi("https://www.datagrandest.fr/data4citizen/d4c/api/datasets/1.0/1642070072496-1/alternative_exports/90c43af4-e5b9-4069-8bf1-61a5b900b476/");
       }));
     }
   });

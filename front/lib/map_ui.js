@@ -13,7 +13,13 @@ async function fetchData(url) {
 }
 
 function createMarker(station, status, map) {
-    const marker = L.marker([station.lat, station.lon]).addTo(map);
+    const marker = L.marker([station.lat, station.lon], {icon: L.icon({
+            iconUrl: '../resources/icon-bicycle.png',
+            iconSize: [41, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        })}).addTo(map);
     marker.bindPopup(`
         <b>${station.name}</b><br>
         Adresse: ${station.address}<br>
@@ -202,7 +208,7 @@ async function getIncidents() {
 }
 
 
-getRestaurants();
+
 
 export async function initMap() {
     try {
@@ -236,6 +242,19 @@ export async function initMap() {
         incidentsReceived.forEach(incident => {
             createIncident(incident, map);
         });
+
+        const legend = L.control({ position: 'bottomright' });
+
+        legend.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'legend');
+            div.innerHTML += '<i style="background: url(../resources/icon-bicycle.png) no-repeat center center / contain"></i>Stations Vélib<br>';
+            div.innerHTML += '<i style="background: url(../resources/icon-restaurant.png) no-repeat center center / contain"></i>Restaurants<br>';
+            div.innerHTML += '<i style="background: url(../resources/icon-incident.png) no-repeat center center / contain"></i>Incidents<br>';
+            return div;
+        };
+
+        legend.addTo(map);
+
 
     } catch (error) {
         console.error('Erreur lors de la récupération des données :', error);

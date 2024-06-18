@@ -79,6 +79,20 @@ p {
     line-height: 1.6;
 }
 
+.legend {
+    background: white;
+    border: 2px solid black;
+    padding: 10px;
+    line-height: 1.5em;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
 
 footer {
     background-color: #333;
