@@ -23,6 +23,7 @@ header {
 
 header h1 {
     margin-bottom: 10px;
+    block-size: max-content;
 }
 
 nav {
@@ -57,9 +58,9 @@ main {
 }
 
 section {
+    padding: 20px 0;
     margin-bottom: 20px;
 }
-
 
 #map {
     height: 80vh;
@@ -77,6 +78,25 @@ h2 {
 
 p {
     line-height: 1.6;
+}
+
+ul {
+    list-style: disc inside;
+    padding-left: 20px;
+    margin-bottom: 20px;
+}
+
+ul ul {
+    list-style: circle inside;
+}
+
+ul ul ul {
+    list-style: square inside;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
 }
 
 .legend {
@@ -129,6 +149,24 @@ p {
 }
 
 
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+article {
+    margin-bottom: 40px;
+}
+
+article p {
+    text-align: justify;
+}
+
+p, ol {
+    margin-bottom: 20px;
+}
 
 footer {
     background-color: #333;
@@ -147,4 +185,5 @@ footer {
         margin: 0 20px;
     }
 }
+
 
