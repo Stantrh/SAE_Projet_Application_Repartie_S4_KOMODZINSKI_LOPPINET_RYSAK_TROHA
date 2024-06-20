@@ -13483,6 +13483,7 @@
         displayWeatherData(weatherData);
       } catch (error) {
         console.error("Erreur lors de la r\xE9cup\xE9ration des donn\xE9es :", error);
+        alert("Erreur lors de la r\xE9cup\xE9ration des donn\xE9es. Assurez-vous que le serveur est lanc\xE9 localement avant de continuer.");
       }
     });
   }
