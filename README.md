@@ -42,7 +42,7 @@ Si jamais des problèmes sont rencontrés lors du script d'installation, exécut
 `javac -d out -cp "libs\javax.json-1.1.4.jar;libs\ojdbc11-23.4.0.24.05.jar;out\" src\Serveur\*.java`
 
 **TERMINAL 1 :** Dans back/out/ :  
-rmiregistry
+`rmiregistry`
 
 **TERMINAL 2 :** Dans back/ :  
 `java -cp "libs\javax.json-1.1.4.jar;libs\ojdbc11-23.4.0.24.05.jar;out\" Service.LancerServiceRMI loppinet3u 35G4Nd65soZu`
