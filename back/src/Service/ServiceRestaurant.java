@@ -70,7 +70,7 @@ public class ServiceRestaurant extends UnicastRemoteObject implements ServiceBDD
     public String reserverTable(String nom, String prenom, int nbPersonne, String tel, int idRestaurant)
             throws RemoteException {
         try {
-            if (nbPersonne > 1) {
+            if (nbPersonne < 1) {
                 return "";
             }
             // Désactiver l'auto-commit pour gérer les transactions manuellement
