@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>SAE Programmation Répartie - Nancy Info</title>
+  <link rel="stylesheet" href="../css/index.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+</head>
+<body>
+<header>
+  <h1>SAE Programmation Répartie</h1>
+  <nav>
+    <ul>
+      <li><a href="#home">Accueil</a></li>
+      <li><a href="#map">Carte de données hétérogènes</a></li>
+      <li><a href="#meteo">Météo</a></li>
+      <li><a href="#compte-rendu">Compte Rendu</a></li>
+    </ul>
+  </nav>
+</header>
+<main>
+  <section id="home">
+    <h2>Accueil</h2>
+    <p>Bienvenue sur le site de présentation des informations hétérogènes sur Nancy. Utilisez le menu pour naviguer entre les différentes rubriques. Le site est basé sur le modèle SPA, c'est à dire que toutes les informations sont chargées dynamiquement sur la même page.</p>
+  </section>
+  <hr>
+  <section>
+    <h2>Carte</h2>
+    <div id="map"></div>
+  </section>
+  <hr>
+  <section id="meteo">
+    <h2>Prévisions Météo</h2>
+    <div id="weather-forecast" class="weather-container"></div>
+  </section>
+
+  <hr>
+
+  <section id="compte-rendu">
+    <div class="container">
+      <h1>Compte Rendu</h1>
+      <article id="introduction">
+        <h2>Introduction</h2>
+        <p>
+          Ce projet s'inscrit dans le cadre de la SAE visant à développer une application répartie permettant d'afficher des informations variées sur la ville de Nancy via une carte interactive utilisant Leaflet. L'objectif principal est de fournir une application accessible depuis un navigateur web capable d'intégrer et de visualiser des données hétérogènes provenant de sources internes et externes. Certaines informations nécessitent l'utilisation d'un proxy pour contourner les restrictions CORS (Cross-Origin Resource Sharing).
+        </p>
+        <p>
+          Le projet se compose de plusieurs modules intégrés accessibles depuis un site web hébergé sur webetu. Ces modules comprennent l'interrogation de bases de données via des services RMI, l'intégration de données ouvertes ainsi que la visualisation et la gestion de données en temps réel.
+        </p>
+      </article>
+
+      <article id="objectifs">
+        <h2>Objectifs du Projet</h2>
+        <ul>
+          <li>Créer une carte interactive centrée sur Nancy :</li>
+          <ul>
+            <li>Développer une carte lisible depuis un navigateur en utilisant la bibliothèque Leaflet centrée sur la ville de Nancy.</li>
+            <li>Ajouter sur cette carte les stations Vélib avec les détails suivants :
+              <ul>
+                <li>L'adresse de chaque station Vélib.</li>
+                <li>Le nombre de vélos disponibles à chaque station.</li>
+                <li>Le nombre de places de parking libres à chaque station.</li>
+              </ul>
+            </li>
+          </ul>
+          <li>Implémenter un proxy HTTP avec la classe HttpServer :</li>
+          <ul>
+            <li>Mettre en place un proxy HTTP servant d'intermédiaire entre le site web et les données externes bloquées par les restrictions CORS.</li>
+            <li>Assurer que ce proxy permette de relayer les requêtes et les réponses.</li>
+          </ul>
+          <li>Proposer deux services RMI utilisés par le proxy :</li>
+          <ul>
+            <li>Développer un service RMI pour la gestion des restaurants et pour accéder aux données bloquées.</li>
+            <li>Utiliser ces services pour ajouter des informations à l’affichage de la carte.</li>
+          </ul>
+          <li>Ajouter des établissements et des incidents sur la carte :</li>
+          <ul>
+            <li>Intégrer les établissements d'enseignement supérieur de Nancy sur la carte avec leurs détails spécifiques.</li>
+            <li>Afficher les lieux des incidents prévus incluant l'adresse exacte, la cause de l'incident et les dates d'incidence.</li>
+          </ul>
+          <li>Enrichir le site avec des fonctionnalités supplémentaires :</li>
+          <ul>
+            <li>Afficher la météo des prochaines heures sur la carte pour offrir des informations météorologiques en temps réel.</li>
+            <li>Permettre aux utilisateurs d'enregistrer un nouveau restaurant en cliquant sur sa localisation sur la carte.</li>
+            <li>Développer un service générique qui, lorsqu'une URL est bloquée par le navigateur, tente automatiquement de récupérer son contenu via le proxy.</li>
+          </ul>
+        </ul>
+        <p>
+          Ces objectifs structurent le projet en différentes phases de développement, chacune apportant des fonctionnalités pour ainsi avoir une application complète et fonctionnelle.
+        </p>
+      </article>
+
+      <article id="analyse">
+        <h2>Analyse Initiale</h2>
+        <h3>Schéma Complet de l'Architecture</h3>
+        <p>L'architecture de notre application répartie est illustrée dans l’annexe :</p>
+        <img src="../resources/Architecture_SAE_Prog_Repartie.jpg" alt="Schéma de l'architecture">
+
+        <h3>Description des Technologies</h3>
+        <ul>
+          <li>Leaflet : Bibliothèque JavaScript pour créer des cartes interactives.</li>
+          <li>Java RMI : Interface permettant l'appel de méthodes à distance sur des objets.</li>
+          <li>HttpClient et HttpServer : Classes Java utilisées pour effectuer des requêtes HTTP et mettre en place un serveur HTTP.</li>
+          <li>Base de données Oracle : Utilisée pour stocker les informations sur les restaurants.</li>
+          <li>JSON : Format de données utilisé pour les échanges entre le client et le serveur.</li>
+        </ul>
+      </article>
+
+      <article id="implementation">
+        <h2>Développement et Implémentation</h2>
+        <h3>Modules Développés</h3>
+        <h4>Service RMI</h4>
+        <h5>Structure de la Base de Données</h5>
+        <p>La base de données est composée de deux tables :</p>
+        <ul>
+          <li>Restaurants : Contient les informations sur les restaurants (RestaurantID, Nom, Adresse, Latitude, Longitude).</li>
+          <li>Reservations : Contient les informations sur les réservations (NumRes, Nom, Prenom, nbConvives, numTel, RestaurantID).</li>
+        </ul>
+
+        <h5>Fonctionnalités RMI</h5>
+        <p>Le service RMI contient une interface ServiceBDD avec les méthodes suivantes :</p>
+        <ul>
+          <li>getAllRestaurant() : Récupère les informations de tous les restaurants.</li>
+          <li>reserverTable(nom, prenom, nbPersonne, tel, idRestaurant) : Permet de faire une réservation dans un restaurant.</li>
+          <li>ajouterRestaurant(nom, adresse, latitude, longitude) : Permet d’ajouter un nouveau restaurant.</li>
+        </ul>
+        <p>
+          L'implémentation de cette interface est réalisée dans le fichier ServiceRestaurant.java, où les réponses sont formatées en JSON. Le fichier LancerServiceRMI.java initialise et met à disposition le service RMI.
+          Pour accéder à ce service, on utilise un HttpServer qui fait la liaison entre le service RMI du restaurant et le site web :
+        </p>
+
+        <h3>Serveur HTTP/Proxy HTTP</h3>
+        <h4>Implémentation du Proxy</h4>
+        <p>
+          Dans le cadre de ce projet, un serveur HTTP en Java a été développé pour servir d'intermédiaire entre le site web et diverses sources de données, dont le service RMI qui permet d’accéder à la base de données de restaurants. De plus, le client HTTP permet d'accéder aux données bloquées par les restrictions CORS en agissant comme un proxy pour relayer les requêtes vers les APIs externes et récupérer les informations.
+        </p>
+
+        <h5>Fichiers Java du Serveur/Proxy HTTP</h5>
+        <ul>
+          <li>
+            <strong>LancerHttpServer.java</strong> :
+            <p>Ce fichier initialise et lance le serveur HTTP. Il configure les différents endpoints et handlers pour traiter les requêtes entrantes. Le serveur écoute sur un port spécifique et redirige les requêtes vers les handlers appropriés.</p>
+          </li>
+          <li>
+            <strong>ProxyHandler.java</strong> :
+            <p>Le ProxyHandler gère les requêtes vers des APIs externes qui pourraient être bloquées par les restrictions CORS. Il reçoit la requête, la retransmet à la destination cible, puis renvoie la réponse au client.</p>
+          </li>
+          <li>
+            <strong>DataService.java et DataServiceImpl.java</strong> :
+            <p>Ces fichiers définissent et implémentent les services nécessaires pour interagir avec les données bloquées par les restrictions CORS. Ils jouent le rôle de proxy en retransmettant les requêtes vers les APIs externes et en renvoyant les réponses.</p>
+          </li>
+          <li>
+            <strong>PostAddRestaurant.java</strong> :
+            <p>Ce handler gère les requêtes POST pour ajouter de nouveaux restaurants dans la base de données. Il reçoit les données du restaurant, les traite, et les insère dans la base de données via les services RMI.</p>
+          </li>
+          <li>
+            <strong>PostHandler.java</strong> :
+            <p>Ce handler gère les requêtes POST pour les réservations de table dans les restaurants. Il reçoit les détails de la réservation, les traite, et les enregistre dans la base de données via les services RMI.</p>
+          </li>
+          <li>
+            <strong>RestaurantHandler.java</strong> :
+            <p>Ce handler gère les requêtes pour récupérer la liste des restaurants depuis la base de données. Il interagit avec les services RMI pour obtenir les données nécessaires et les renvoie au client en format JSON.</p>
+          </li>
+          <li>
+            <strong>ServiceHttpRestaurant.java</strong> :
+            <p>Ce fichier contient les méthodes de service pour interagir avec la base de données des restaurants via RMI. Il définit les méthodes d'ajout et de récupération des restaurants.</p>
+          </li>
+        </ul>
+
+        <h5>Fonctionnalités du Serveur HTTP et Proxy</h5>
+        <ul>
+          <li>
+            <strong>Relai des Requêtes Bloquées (CORS)</strong> :
+            <p>Le ProxyHandler joue un rôle crucial en permettant aux requêtes bloquées par les restrictions CORS d'atteindre leurs destinations. Il reçoit les requêtes du client, utilise DataService pour les retransmettre à l'API externe, puis renvoie la réponse au client, assurant l’accès aux données.</p>
+          </li>
+          <li>
+            <strong>Gestion des Restaurants</strong> :
+            <p>Le serveur HTTP gère également les opérations de création et de récupération des restaurants. Le handler PostAddRestaurant reçoit les données des nouveaux restaurants via des requêtes POST et les ajoute à la base de données via les services RMI. Le handler RestaurantHandler permet de récupérer la liste des restaurants en interagissant avec les services RMI et en renvoyant les données au client en format JSON.</p>
+          </li>
+          <li>
+            <strong>Intégration avec la Carte Leaflet</strong> :
+            <p>Les données récupérées par le serveur/proxy HTTP sont utilisées pour remplir la carte interactive Leaflet.</p>
+          </li>
+        </ul>
+      </article>
+
+      <article id="responsabilite">
+        <h2>Est-il Responsable de Contourner la Politique de Sécurité de Votre Navigateur ?</h2>
+        <p>
+          Contourner la politique de sécurité d’un navigateur, en particulier les restrictions imposées par CORS (Cross-Origin Resource Sharing), peut sembler une solution pratique pour accéder à des ressources bloquées. Cependant, cette pratique soulève plusieurs questions concernant la responsabilité, la sécurité et l'éthique.
+        </p>
+        <h3>Qu'est-ce que la Politique de Sécurité CORS ?</h3>
+        <p>
+          CORS est une politique de sécurité mise en place par les navigateurs web pour protéger les utilisateurs contre des attaques telles que le Cross-Site Request Forgery (CSRF). Cette politique empêche un site web d'effectuer des requêtes vers un domaine différent de celui d'où il a été chargé, à moins que le serveur de destination n'autorise explicitement ces requêtes en incluant des en-têtes spécifiques.
+        </p>
+        <h3>Pourquoi Contourner CORS ?</h3>
+        <p>
+          Dans le contexte de ce projet, l'équipe a utilisé un proxy pour contourner les restrictions CORS afin d'accéder à des données pour l'application. Cette approche a été jugée nécessaire car les créateurs de l'API des incidents de circulation ont laissé la sécurité CORS activée sans réelle justification, étant donné qu'il n'y a pas de connexions ou de fonctionnalités impliquant des tokens d'autorisation sensibles. À titre de comparaison, pour des API critiques comme celles des banques, laisser une telle sécurité est indispensable car elle protège des actions potentiellement malveillantes comme des virements de fonds non autorisés.
+        </p>
+        <h3>Les Risques Associés</h3>
+        <ul>
+          <li>
+            <strong>Sécurité :</strong>
+            <ul>
+              <li><strong>Exposition aux Attaques :</strong> En contournant CORS, l'application peut involontairement être exposée à des attaques malveillantes. Si le proxy n'est pas correctement sécurisé, des attaquants pourraient exploiter cette vulnérabilité pour injecter des contenus malicieux ou pour accéder à des données sensibles.</li>
+              <li><strong>Manque de Validation :</strong> Le proxy doit valider toutes les requêtes et les réponses pour s'assurer qu'aucune donnée malicieuse n'est transmise. Sans cette validation, le risque d'introduire des vulnérabilités dans l'application augmente.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Responsabilité :</strong>
+            <ul>
+              <li><strong>Non-Respect des Politiques de Serveurs :</strong> En contournant les restrictions CORS, l'équipe peut aller à l'encontre des politiques de sécurité définies par les serveurs tiers. Ces politiques sont en place pour protéger les données et les utilisateurs, et les contourner peut être considéré comme une violation de ces règles.</li>
+              <li><strong>Imprévus Juridiques :</strong> Il pourrait y avoir des implications légales à contourner des mesures de sécurité, surtout si cela est fait sans l'autorisation des propriétaires des ressources.</li>
+            </ul>
+          </li>
+        </ul>
+        <h3>Pratiques Responsables et Alternatives</h3>
+        <ul>
+          <li><strong>Obtenir les Autorisations Nécessaires :</strong> Contactez les administrateurs des API ou des ressources pour obtenir les autorisations nécessaires. Ils peuvent ajouter notre domaine à la liste blanche, permettant ainsi un accès direct sans besoin de contournement.</li>
+          <li><strong>Utiliser des Services Proposés Officiellement :</strong> De nombreuses API proposent des méthodes officielles pour accéder aux données en toute sécurité. Utilisez des clés API et suivez les meilleures pratiques recommandées par les fournisseurs de services.</li>
+          <li><strong>Sécuriser le Proxy :</strong> Si l'utilisation d'un proxy est inévitable, assurez-vous que le proxy est bien sécurisé. Implémentez des mesures de validation strictes pour filtrer les requêtes et les réponses, et limitez les accès uniquement aux domaines et ressources nécessaires.</li>
+          <li><strong>Éducation et Sensibilisation :</strong> Informez votre équipe et vos utilisateurs des risques associés au contournement des politiques de sécurité. Encouragez une culture de sécurité et de respect des règles établies par les fournisseurs de services.</li>
+        </ul>
+        <h3>Conclusion</h3>
+        <p>
+          Contourner la politique de sécurité d’un navigateur, bien que parfois nécessaire comme dans notre cas, comporte des risques importants et soulève des questions éthiques et légales. Il est essentiel d'évaluer ces risques et de chercher des alternatives plus sécurisées et conformes.
+        </p>
+      </article>
+
+      <article id="client-web">
+        <h2>Client Web</h2>
+        <p>
+          Le site web de notre projet permet aux utilisateurs de visualiser diverses informations sur la ville de Nancy à l'aide d'une carte Leaflet. Voici une présentation des différents fichiers JavaScript utilisés pour le développement du site web :
+        </p>
+        <h3>Fichiers JavaScript Principaux</h3>
+        <ul>
+          <li>
+            <strong>index.js</strong> :
+            <p>Le fichier index.js est le point d'entrée principal du site web. Il initialise la carte Leaflet dès que le DOM est complètement chargé.</p>
+          </li>
+          <li>
+            <strong>dataloader.js</strong> :
+            <p>Ce fichier contient la fonction fetchWithProxy de récupération des données, en gérant les restrictions CORS via un proxy géré en java.</p>
+          </li>
+          <li>
+            <strong>config.js</strong> :
+            <p>Ce fichier contient les constantes de configuration, incluant les URLs des différentes APIs utilisées dans le projet.</p>
+          </li>
+          <li>
+            <strong>map_ui.js</strong> :
+            <p>Ce fichier contient les fonctions principales pour la gestion et l'affichage des données sur la carte Leaflet.</p>
+          </li>
+        </ul>
+
+        <h3>Récupération des Données Ouvertes et Gestion des Restrictions CORS</h3>
+        <p>
+          Le processus de récupération des données et la gestion des restrictions CORS sont centralisés autour de la fonction fetchWithProxy.
+        </p>
+
+        <h4>Récupération des Données Ouvertes</h4>
+        <p>
+          Pour obtenir des informations telles que les stations Vélib, le site effectue des requêtes HTTP vers des APIs ouvertes. La fonction fetchWithProxy est utilisée pour envoyer ces requêtes et traiter les réponses.
+        </p>
+        <ul>
+          <li><strong>Requête Initiale :</strong> La fonction envoie une requête HTTP directe à l'API cible en utilisant l'URL spécifiée.</li>
+          <li><strong>Réponse de l'API :</strong> Si l'API répond sans problème (statut HTTP 200), les données sont récupérées et retournées sous forme de JSON.</li>
+        </ul>
+
+        <h4>Gestion des Données Bloquées par les Restrictions CORS</h4>
+        <p>
+          Lorsqu'une requête est bloquée par les restrictions CORS, la fonction fetchWithProxy implémente une solution pour contourner ce problème en utilisant un proxy.
+        </p>
+        <ul>
+          <li><strong>Détection du Problème CORS :</strong>
+            <ul>
+              <li><strong>Erreur CORS :</strong> Si la requête initiale échoue à cause des restrictions CORS, une erreur est levée.</li>
+              <li><strong>Utilisation du Proxy :</strong> La fonction construit une nouvelle URL en incluant l'URL cible dans une requête vers un proxy interne (serveur HTTP en Java configuré pour relayer les requêtes).</li>
+            </ul>
+          </li>
+          <li><strong>Relais via le Proxy :</strong>
+            <ul>
+              <li><strong>Requête au Proxy :</strong> Une nouvelle requête est envoyée au serveur proxy, qui est chargé de relayer la requête vers l'API externe.</li>
+              <li><strong>Réponse du Proxy :</strong> Le proxy reçoit la réponse de l'API externe, la renvoie au site web, permettant ainsi de contourner les restrictions CORS.</li>
+            </ul>
+          </li>
+        </ul>
+      </article>
+    </div>
+  </section>
+</main>
+<footer>
+  <p>&copy; 2024 - Projet SAE Programmation Répartie</p>
+  <p>KOMODZINSKI - LOPPINET - RYSAK - TROHA </p>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+<script src='../js/index.js' defer ></script>
+</body>
+</html>

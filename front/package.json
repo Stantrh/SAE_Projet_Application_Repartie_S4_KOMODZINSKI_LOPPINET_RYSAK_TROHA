@@ -1,9 +1,14 @@
 {
   "dependencies": {
     "esbuild": "0.17.18",
-    "handlebars": "^4.7.8"
+    "handlebars": "^4.7.8",
+    "leaflet": "^1.9.4",
+    "leaflet-control-geocoder": "^1.13.0",
+    "leaflet.heat": "^0.2.0",
+    "leaflet.markercluster": "^1.5.3"
   },
   "scripts": {
-    "build": "esbuild index.js --bundle  --sourcemap --target=es2015 --outfile=js/index.js"
+    "build": "esbuild index.js --bundle  --sourcemap --target=es2015 --outfile=js/index.js",
+    "watch": "esbuild index.js --bundle --sourcemap --target=es2015 --outfile=js/index.js --watch"
   }
 }
