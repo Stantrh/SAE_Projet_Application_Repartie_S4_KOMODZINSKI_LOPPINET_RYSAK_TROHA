@@ -82,7 +82,7 @@ function createRestaurantMarker(restaurant, map) {
         <input type="number" id="nbPersonne" name="nbPersonne" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
         
         <label for="tel" style="font-weight: bold; color: #333;">Téléphone:</label>
-        <input type="text" id="tel" name="tel" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
+        <input type="text" id="tel" name="tel" min=0 style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
         
         <input type="hidden" id="idRestaurant" name="idRestaurant" value="${restaurant.RestaurantID}">
         
@@ -108,7 +108,7 @@ function createRestaurantMarker(restaurant, map) {
             };
 
             try {
-                const response = await fetchWithProxy(`${API_SERVEUR_URL}/reserverTable`, {
+                const response = await fetch(`${API_SERVEUR_URL}/reserverTable`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -117,6 +117,7 @@ function createRestaurantMarker(restaurant, map) {
                 });
                 const result = await response.text();
                 alert(result);
+                marker.closePopup();
             } catch (error) {
                 console.error('Erreur:', error);
                 alert('Erreur lors de la réservation. Veuillez réessayer.');
@@ -197,14 +198,12 @@ const ajouterEvenementAjoutRestaurant = (map) => {
                             body: JSON.stringify(restaurant)
                         });
 
-                        const result = await response.json();
 
                         createRestaurantMarker(restaurant, map);
 
                         // On ferme le popup après l'ajout
                         popup.remove();
 
-                        console.log('Restaurant ajouté avec succès:', result);
                     } catch (error) {
                         console.error('Erreur:', error);
                     }
@@ -294,7 +293,6 @@ export async function initMap() {
 
 
         const etablissementsReceived = await getEtablissements();
-        console.log(JSON.stringify(etablissementsReceived.results));
         etablissementsReceived.results.forEach(etablissement => {
             createEtablissementMarker(etablissement, map)
         });

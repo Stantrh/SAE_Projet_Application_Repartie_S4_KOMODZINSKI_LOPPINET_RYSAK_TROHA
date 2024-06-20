@@ -67,8 +67,12 @@ public class ServiceRestaurant extends UnicastRemoteObject implements ServiceBDD
     }
 
     @Override
-    public String reserverTable(String nom, String prenom, int nbPersonne, String tel, int idRestaurant) throws RemoteException {
+    public String reserverTable(String nom, String prenom, int nbPersonne, String tel, int idRestaurant)
+            throws RemoteException {
         try {
+            if (nbPersonne > 1) {
+                return "";
+            }
             // Désactiver l'auto-commit pour gérer les transactions manuellement
             connexion.setAutoCommit(false);
 
@@ -110,9 +114,9 @@ public class ServiceRestaurant extends UnicastRemoteObject implements ServiceBDD
         }
     }
 
-
     @Override
-    public String ajouterRestaurant(String nom, String adresse, Double latitude, Double longitude) throws RemoteException {
+    public String ajouterRestaurant(String nom, String adresse, Double latitude, Double longitude)
+            throws RemoteException {
         try {
             // Désactiver l'auto-commit pour gérer les transactions manuellement
             connexion.setAutoCommit(false);
@@ -148,7 +152,7 @@ public class ServiceRestaurant extends UnicastRemoteObject implements ServiceBDD
                     }
                     // Retourne la chaîne JSON
                     return stringWriter.toString();
-                } else{
+                } else {
                     connexion.rollback();
                     return "";
                 }

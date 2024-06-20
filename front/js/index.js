@@ -13338,7 +13338,7 @@
         <input type="number" id="nbPersonne" name="nbPersonne" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
         
         <label for="tel" style="font-weight: bold; color: #333;">T\xE9l\xE9phone:</label>
-        <input type="text" id="tel" name="tel" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
+        <input type="text" id="tel" name="tel" min=0 style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
         
         <input type="hidden" id="idRestaurant" name="idRestaurant" value="${restaurant.RestaurantID}">
         
@@ -13360,7 +13360,7 @@
             idRestaurant: parseInt(formData.get("idRestaurant"))
           };
           try {
-            const response = yield fetchWithProxy(`${API_SERVEUR_URL}/reserverTable`, {
+            const response = yield fetch(`${API_SERVEUR_URL}/reserverTable`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json"
@@ -13369,6 +13369,7 @@
             });
             const result = yield response.text();
             alert(result);
+            marker.closePopup();
           } catch (error) {
             console.error("Erreur:", error);
             alert("Erreur lors de la r\xE9servation. Veuillez r\xE9essayer.");
@@ -13461,7 +13462,6 @@
         });
         ajouterEvenementAjoutRestaurant(map);
         const etablissementsReceived = yield getEtablissements();
-        console.log(JSON.stringify(etablissementsReceived.results));
         etablissementsReceived.results.forEach((etablissement) => {
           createEtablissementMarker(etablissement, map);
         });
@@ -13532,10 +13532,8 @@
                         },
                         body: JSON.stringify(restaurant)
                       });
-                      const result2 = yield response.json();
                       createRestaurantMarker(restaurant, map);
                       popup.remove();
-                      console.log("Restaurant ajout\xE9 avec succ\xE8s:", result2);
                     } catch (error) {
                       console.error("Erreur:", error);
                     }
