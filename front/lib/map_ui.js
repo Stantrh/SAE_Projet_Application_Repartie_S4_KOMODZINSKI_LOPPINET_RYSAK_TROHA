@@ -325,5 +325,6 @@ export async function initMap() {
 
     } catch (error) {
         console.error('Erreur lors de la récupération des données :', error);
+        alert('Erreur lors de la récupération des données. Assurez-vous que le serveur est lancé localement avant de continuer.');
     }
 }
